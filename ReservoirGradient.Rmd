@@ -122,7 +122,9 @@ OTUs <- OTUs[-which(coverage < 10000), ]
 design <- design[-which(coverage < 10000), ]
 # Remove OTUs with less than two occurences across all sites
 OTUs <- OTUs[, which(colSums(OTUs) >= 2)]
-# OTUs <- rrarefy(OTUs, min(coverage))
+coverage <- rowSums(OTUs)
+set.seed(47405)
+OTUs <- rrarefy(OTUs, min(coverage))
 
 # Make Relative Abundance Matrices
 OTUsREL <- decostand(OTUs, method = "total")
@@ -151,7 +153,7 @@ env.dat %>% select(dist.dam, DO, pH, TP, chla) %>%
   theme(strip.background = element_blank(), 
         strip.text = element_text(size = 14),
         strip.placement = "outside") + 
-  labs(x = "Reservoir Transect (m)",
+  labs(x = "Reservoir distance (m)",
        y = "") +
   scale_x_reverse() +
   scale_y_continuous()
@@ -184,8 +186,8 @@ alpha.div <- cbind(design, S.obs, simpsE, shan, exp.shan)
 
 
 # # estimate asymptotic richness
-# divestim <- iNEXT(t(OTUs), datatype = "abundance", nboot = 999)
-# saveRDS(divestim, file = "intermediate-data/inext-output-999boots.rda")
+#divestim <- iNEXT(t(OTUs), datatype = "abundance", nboot = 999)
+#saveRDS(divestim, file = "intermediate-data/inext-output-999boots.rda")
 divestim <- read_rds("intermediate-data/inext-output-999boots.rda")
 divestim.df <- fortify(divestim) %>% 
   mutate(habitat = str_to_title(design[as.character(site),"type"]))
@@ -200,12 +202,12 @@ divestim.df %>%
   geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
   geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
   geom_line(alpha = 1, linetype = "dashed") +
-  scale_x_continuous(labels = scales::comma) +
-  labs(x = "Sample Size", y = "Estimated Richness") +
+  scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
+  labs(x = "Sample size", y = "Estimated richness") +
   theme(legend.position = "none") +
   #theme(legend.position =  c(.88,.5)) +
-  annotate(label = "Soil", size = 6, geom = "text", x = 450000, y = 7500) + 
-  annotate(label = "Water", size = 6, geom = "text", x = 450000, y = 1500) + 
+  annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) + 
+  annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) + 
   scale_color_grey(end = .7) +
   scale_fill_grey(end = .7)
 ```
@@ -249,7 +251,7 @@ hill.water.mods %>%
          "p-value" = p.value) %>% 
   filter(Term != "(Intercept)") %>% 
   select(Diversity, everything()) %>% 
-  pander(round = 2)
+  pander(round = 4)
 ```
 
 ```{r hill_div_plot, fig.asp=1/.618}
@@ -262,13 +264,15 @@ hill.estim %>% filter(type == "water") %>%
   # geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), 
   #                width = 10, alpha = 0.5) +
   geom_smooth(method = "lm", aes(linetype = molecule)) +
-  labs(x = "Reservoir Transect (m)",
-       y = "Estimated Diversity (Species Equivalents)") +
+  labs(x = "Reservoir distance (m)",
+       y = "") +
   scale_color_manual(values = my.cols) +
   scale_fill_manual(values = my.cols) + 
-  theme(legend.position = c(.88,.95)) +
+  theme(legend.position = c(.88,.95), strip.placement = "outside",
+        strip.text = element_text(size = 16)) +
   scale_x_reverse() +
-  facet_wrap(~ Diversity, scales = "free", ncol = 1)
+  facet_grid(Diversity ~ ., scales = "free", switch = "y") +
+  guides(fill = guide_legend(override.aes=list(fill=NA)))
   #facet_grid(Diversity ~ ., scales = "free")
 ```
 So, from the basis of these results, we can make the following conclusions. 
@@ -317,9 +321,9 @@ data.frame(scores(ul.pcoa)) %>%
   labs(x = paste0("PCoA 1 (", explainvars[1],"%)"),
        y = paste0("PCoA 2 (", explainvars[2],"%)")) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = .2, y = -.33, label = "Active", size = 6) +
-  annotate(geom = "text", x = -.3, y = .1, label = "Total", size = 6) + 
-  annotate(geom = "text", x = -.57, y = -.1, label = "Soils", size = 6)
+  annotate(geom = "text", x = .2, y = 0, label = "Active", size = 6) +
+  annotate(geom = "text", x = -.25, y = -.3, label = "Total", size = 6) + 
+  annotate(geom = "text", x = .3, y = -.4, label = "Soils", size = 6)
 ```
 
 ```{r ordination_animate, eval = FALSE, include=FALSE}
@@ -387,14 +391,15 @@ UL.sim %>%
              color = molecule, fill = molecule, shape = molecule)) +
   geom_point(alpha = 0.8, size = 3, show.legend = T) + 
   geom_smooth(method = "lm", show.legend = T, aes(linetype = molecule)) + 
-  labs(y = str_wrap("Similarity to Soil Community", width = 20), 
-       x = "Reservoir Transect (m)") + 
+  labs(y = str_wrap("Similarity to soil community", width = 20), 
+       x = "Reservoir distance (m)") + 
   scale_color_manual(values = my.cols) + 
   scale_fill_manual(values = my.cols) +
   theme(legend.position = c(0.85, 0.85)) +
   scale_x_reverse(limits = c(400,0)) + 
   annotate(geom = "text", x = 50, y = 0.15, size = 6,
-           label = paste0("R^2== ",round(summary(model.terr)$r.squared, 2)), parse = T)
+           label = paste0("r^2== ",round(summary(model.terr)$r.squared, 2)), parse = T) +
+  guides(fill = guide_legend(override.aes=list(fill=NA)))
 ```
 We find that our model captures most of the variation in community structure \((R^2 = `r summary(model.terr)$r.squared`)\). We note a significant influence of distance on community similarity and the presence of a significant interaction between distance and whether the comparison is for  active or total bacterial communities. This indicates that total communities decay faster with distance to soils than active communities do, which might be explained by the large difference in initial intercept. Active communities are always highly dissimilar to soil communities and remain so across the lake, while total lake communities are initially similar to soils, but this influence dissipates with distance into the reservoir. 
 
@@ -422,11 +427,32 @@ w.rna <- OTUs[which(design$molecule == "RNA" & design$type == "water"), ]
 # pull out the lake rna counts for otus found in lake and soil
 lake.and.soil.act <- w.rna[,colnames(lake.and.soil.total)]
 
-# of these lake and soil taxa, which are never active?
+# of these lake and soil taxa, which are never active? active?
 nvr.act <- which(colSums(lake.and.soil.act) == 0)
 yes.act <- which(colSums(lake.and.soil.act) != 0)
+
+# how many otus are active relative to the total number of otus 
 length(nvr.act) / ncol(lake.and.soil.total)
 length(yes.act) / ncol(lake.and.soil.total)
+
+# of taxa who were never active, what fraction of the total community did they represent?
+sum(rowSums(w.dna[,names(nvr.act)]))
+sum(rowSums(w.dna[,names(yes.act)]))
+sum(rowSums(w.dna[,names(nvr.act)])) / sum(rowSums(w.dna))
+
+# of taxa who became active, what fraction of the active community did they represent?
+sum(rowSums(w.rna[,names(nvr.act)]))
+sum(rowSums(w.rna[,names(yes.act)]))
+sum(rowSums(w.rna[,names(nvr.act)])) / sum(rowSums(w.rna))
+sum(rowSums(w.rna[,names(yes.act)])) / sum(rowSums(w.rna))
+
+prop.nvr.act <- rowSums(w.dna[,nvr.act]) / rowSums(w.dna)
+# cbind.data.frame(design.dna, inactive = prop.nvr.act) %>% 
+#   ggplot(aes(x = distance, y = inactive)) +
+#   geom_point() + 
+#   geom_line(stat = "smooth", method = "lm", formula = y ~ x, se = F) +
+#   labs(x = "Reservoir transect (m)", y = "Rel. abundance of taxa\n that are never active") +
+#   scale_x_reverse()
 ```
 
 We calculate the richness of the soil taxa that are never active in the lake. We calculate richness from the DNA-based samples. 
@@ -456,9 +482,9 @@ tibble(transient_rich = terr.rich, distance = design.dna$distance) %>%
   scale_x_reverse(limits = c(400,0)) +
   scale_y_log10() +
   annotation_logticks(sides = "l") +
-  labs(x = "Reservoir Transect (m)",
-       y = "Richness of Inactive \nSoil Taxa in Reservoir") +
-  annotate("text", x = 50, y = 750, size = 6, label = paste0("R^2== ",T1.R2), parse = T) 
+  labs(x = "Reservoir distance (m)",
+       y = "Richness of inactive \nsoil taxa in reservoir") +
+  annotate("text", x = 50, y = 750, size = 6, label = paste0("r^2== ",T1.R2), parse = T) 
 
 ```
 
@@ -506,8 +532,8 @@ Now, lets plot the abundances of the OTUs across the reservoir and split them up
 ```{r coreplot, fig.asp=1/.618}
 bind_rows(in.soil.to.plot, in.lake.to.plot) %>% 
   ggplot(aes(x = distance, y = rel_abundance, group = otu_id)) + 
-  labs(x = "Reservoir Transect (m)", 
-       y = "OTU Relative Abundance") +
+  labs(x = "Reservoir distance (m)", 
+       y = "OTU relative abundance") +
   geom_line(alpha = 0.25, stat = "smooth", method = "lm", se = F, show.legend = F) +
   scale_y_log10() +
   scale_x_reverse() + 
@@ -568,7 +594,7 @@ pander(soil.core.increasing, caption = "Core taxa found in soils that get more c
 ```
 
 
-```{r sig_taxa}
+```{r sig_taxa, fig.asp=1}
 # p1 <- as.data.frame(OTUsREL[,nonsoil.core.increasing$OTU]) %>% 
 #   rownames_to_column("sampleID") %>% 
 #   left_join(rownames_to_column(design, "sampleID")) %>% 
@@ -648,25 +674,34 @@ df3 <- as.data.frame(OTUsREL[,soil.core.decreasing$OTU]) %>%
   filter(molecule == "DNA") %>% left_join(OTU.tax) %>% 
   mutate(soils = "Present in soils", change = "Decreasing")
 n3 <- length(unique(df3$OTU))
-df.plot <- as_tibble(rbind.data.frame(df1, df2, df3)) %>% filter(type == "water")
 
+df4 <- as.data.frame(OTUsREL[,nonsoil.core.decreasing$OTU]) %>% 
+  rownames_to_column("sampleID") %>% 
+  left_join(rownames_to_column(design, "sampleID")) %>% 
+  gather(OTU, rel_abund, -station, -molecule, -type, -distance, -sampleID) %>% 
+  filter(molecule == "DNA") %>% left_join(OTU.tax) %>% 
+  mutate(soils = "Absent from soils", change = "Decreasing")
+n4 <- length(unique(df4$OTU))
+
+
+df.plot <- as_tibble(rbind.data.frame(df1, df2, df3, df4)) %>% filter(type == "water")
 
 df.plot %>% mutate(rel_abund = ifelse(rel_abund == 0, 1e-6, rel_abund)) %>% 
-  filter(soils == "Present in soils") %>% 
-  mutate(change = ifelse(change == "Increasing", 
-                         paste0("Increasing (n = ", n2,")"),
-                         paste0("Decreasing (n = ", n3,")"))) %>% 
+  #filter(soils == "Present in soils") %>% 
+  #mutate(change = ifelse(change == "Increasing", 
+  #                       paste0("Increasing (n = ", n2,")"),
+  #                       paste0("Decreasing (n = ", n3,")"))) %>% 
   ggplot(aes(x = distance, y = rel_abund, group = OTU)) + 
-  #geom_point(alpha = 0.5) + 
+  geom_jitter(alpha = 0.15) + 
   geom_line(stat = "smooth", alpha = 0.25, size = 1,
-            color = "black", method = "loess", span = 1, se = FALSE) + 
+            color = "black", method = "lm", span = 1, se = FALSE) +
   scale_x_reverse() +
   scale_y_log10(labels = scales::scientific) +
   theme(legend.position = "none") +
   guides(color = guide_legend(ncol = 1)) +
-  labs(x = "Reservoir Transect (m)",
-       y = "Relative Abundance") + 
-  facet_wrap( ~ change)
+  labs(x = "Reservoir distance (m)",
+       y = "Relative abundance") + 
+  facet_grid(soils ~ change)
 
 
 # how much do the different core components contribute to total abundances
