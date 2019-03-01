@@ -385,7 +385,7 @@ pander(model.terr)
 
 
 ```{r plot_similarity_to_soils, fig.asp = .618}
-UL.sim %>% 
+similarity.plot <- UL.sim %>% 
   mutate(molecule = ifelse(UL.sim$molecule == "DNA", "Total", "Active")) %>% 
   ggplot(aes(x = distance, y = bray.mean, 
              color = molecule, fill = molecule, shape = molecule)) +
@@ -400,6 +400,7 @@ UL.sim %>%
   annotate(geom = "text", x = 50, y = 0.15, size = 6,
            label = paste0("r^2== ",round(summary(model.terr)$r.squared, 2)), parse = T) +
   guides(fill = guide_legend(override.aes=list(fill=NA)))
+similarity.plot
 ```
 We find that our model captures most of the variation in community structure \((R^2 = `r summary(model.terr)$r.squared`)\). We note a significant influence of distance on community similarity and the presence of a significant interaction between distance and whether the comparison is for  active or total bacterial communities. This indicates that total communities decay faster with distance to soils than active communities do, which might be explained by the large difference in initial intercept. Active communities are always highly dissimilar to soil communities and remain so across the lake, while total lake communities are initially similar to soils, but this influence dissipates with distance into the reservoir. 
 
@@ -475,7 +476,7 @@ pander(terr.mod1)
 We find distance is a highly significant predictor of the richness of these soil-derived taxa (on a log-scale). 
 
 ```{r plot_transient, fig.asp = .618}
-tibble(transient_rich = terr.rich, distance = design.dna$distance) %>% 
+transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$distance) %>% 
   ggplot(aes(x = distance, y = transient_rich)) + 
   geom_smooth(method = "lm", color = "black", fill = "grey") +
   geom_point(alpha = 1, color = "black") + 
@@ -483,10 +484,18 @@ tibble(transient_rich = terr.rich, distance = design.dna$distance) %>%
   scale_y_log10() +
   annotation_logticks(sides = "l") +
   labs(x = "Reservoir distance (m)",
-       y = "Richness of inactive \nsoil taxa in reservoir") +
+       y = "Richness of dormant \nsoil taxa in reservoir") +
   annotate("text", x = 50, y = 750, size = 6, label = paste0("r^2== ",T1.R2), parse = T) 
-
+transient.plot
 ```
+
+
+
+```{r combine_plots, fig.asp = 1/.618}
+cowplot::plot_grid(similarity.plot, transient.plot, 
+                   labels = "auto", ncol = 1, align = "hv")
+```
+
 
 # What is the fate of soil-derived taxa in the reservoir? 
 So, we observe that most soil-derived taxa appear to decay once they enter the reservoir. Do any soil-derived taxa persist in the active bacterial community of the reservoir and do they rise to high relative abundances?
