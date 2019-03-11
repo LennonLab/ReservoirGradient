@@ -43,6 +43,7 @@ library("flextable") #must have gdtools installed also
 library("broom")
 library("ggpmisc")
 library("pander")
+library("lubridate")
 
 source("bin/mothur_tools.R")
 se <- function(x, ...){sd(x, na.rm = TRUE)/sqrt(length(na.omit(x)))}
@@ -136,7 +137,7 @@ OTUsREL.log <- decostand(OTUs, method = "log")
 
 # Reservoir environmental gradients
 Just to see if there are any strong underlying resource or nutrient gradients in the reservoir, we'll plot them along the distance of the reservoir.
-```{r env_plot, fig.asp=1/.618}
+```{r env_plot, fig.asp=4/3}
 facet.labs <- c(`chla` = "Chlorophyll-a",
                 `color` = "Color",
                 `DO` = "Dissolved Oxygen",
@@ -194,7 +195,7 @@ divestim.df <- fortify(divestim) %>%
 ```
 
 Here is the resulting curve, showing the higher diversity in soil samples relative to the lake samples. 
-```{r rare_extrap_plot, fig.asp = .618}
+```{r rare_extrap_plot, fig.asp = 3/4}
 divestim.df %>% 
   ggplot(aes(x = x, y = y, 
              ymin = y.lwr, ymax = y.upr, 
@@ -254,26 +255,55 @@ hill.water.mods %>%
   pander(round = 4)
 ```
 
-```{r hill_div_plot, fig.asp=1/.618}
-hill.estim %>% filter(type == "water") %>% 
+```{r hill_div_plot, fig.asp=3/4}
+# hill.estim %>% filter(type == "water") %>% 
+#   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
+#   ggplot(aes(x = distance, y = Estimator, 
+#              ymin = LCL, ymax = UCL,
+#              color = molecule, fill = molecule, shape = molecule)) + 
+#   geom_point(size =3) + 
+#   # geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), 
+#   #                width = 10, alpha = 0.5) +
+#   geom_smooth(method = "lm", aes(linetype = molecule)) +
+#   labs(x = "Reservoir distance (m)",
+#        y = "") +
+#   scale_color_manual(values = my.cols) +
+#   scale_fill_manual(values = my.cols) + 
+#   theme(legend.position = c(.88,.95), strip.placement = "outside",
+#         strip.text = element_text(size = 16)) +
+#   scale_x_reverse() +
+#   facet_grid(Diversity ~ ., scales = "free", switch = "y") +
+#   guides(fill = guide_legend(override.aes=list(fill=NA)))
+  #facet_grid(Diversity ~ ., scales = "free")
+
+# postitions for labels
+xpos = max((na.omit(hill.estim$distance)))
+yposDNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 400, molecule = "DNA"))
+yposRNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 400, molecule = "RNA"))
+alpha.fig <- hill.estim %>% filter(type == "water", Diversity == "Species richness") %>% 
   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
   ggplot(aes(x = distance, y = Estimator, 
              ymin = LCL, ymax = UCL,
              color = molecule, fill = molecule, shape = molecule)) + 
-  geom_point(size =3) + 
+  geom_point(size =3, alpha = 0.8) + 
   # geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), 
   #                width = 10, alpha = 0.5) +
   geom_smooth(method = "lm", aes(linetype = molecule)) +
   labs(x = "Reservoir distance (m)",
-       y = "") +
+       y = "Estimated richness") +
+  scale_x_reverse(limits = c(400,0)) +
+  scale_y_continuous(breaks = seq(0, 3000, by = 500)) +
   scale_color_manual(values = my.cols) +
-  scale_fill_manual(values = my.cols) + 
-  theme(legend.position = c(.88,.95), strip.placement = "outside",
-        strip.text = element_text(size = 16)) +
-  scale_x_reverse() +
-  facet_grid(Diversity ~ ., scales = "free", switch = "y") +
-  guides(fill = guide_legend(override.aes=list(fill=NA)))
-  #facet_grid(Diversity ~ ., scales = "free")
+  scale_fill_manual(values = my.cols) +
+  theme(legend.position = "none") +
+  guides(fill = guide_legend(override.aes=list(fill=NA))) +
+  annotate("text", x = 375, y = yposRNA + 300, 
+           label = "Active", size = 5) +
+  annotate("text", x = 375, y = yposDNA + 300, 
+           label = "Total", size = 5) +
+  annotate(geom = "text", x = 0, y = 2750, hjust = 1, vjust = 1, size = 5,
+           label = paste0("r^2== ",round(summary(hill.water.mod.rich)$r.squared, 2)), parse = T)
+alpha.fig
 ```
 So, from the basis of these results, we can make the following conclusions. 
 First, we note that diversity in the total community decays from the stream inlet to the dam of the reservoir. That is, all the lines have a negative slope. 
@@ -281,6 +311,67 @@ However, we do not see this decay in the metabolically active community.
 Second, we note that the metabolically actively community has much lower diversity than the total community near the soils, but this difference decreases toward the dam. 
 Last, because we quantified diversity across three orders of Hill numbers (q = 0, 1, and 2), we can also say something about the relative importance of rare versus common taxa along the reservoir transect. 
 We see the the significance of the distance-by-molecule interaction term decrease as rare taxa are downweighted in favor of common taxa. This suggests that the differences between the active and total communities along the transect is driven primarily by rare taxa. However, the general trend of higher Simpson diversity across the whole transect suggests that low-activity, but relatively common, taxa are maintained in the reservoir.
+
+## Similarity To Terrestrial Habitat Across Gradient (Terrestrial Influence)
+Here, we fit a linear model to the similarity of the aquatic community to the soil community. 
+```{r tab_similarity_to_soils}
+# Similarity to Soil Sample
+UL.bray      <- 1-as.matrix(vegdist(OTUsREL.log, method="bray"))
+UL.bray.lake <- UL.bray[-c(1:3), 1:3] 
+bray.mean    <- round(apply(UL.bray.lake, 1, mean), 3)
+bray.se      <- round(apply(UL.bray.lake, 1, se), 3)
+UL.sim       <- cbind(design[-c(1:3), ], bray.mean, bray.se)
+
+# Calculate Linear Model
+model.terr <- lm(bray.mean ~ distance * molecule, data = UL.sim)
+pander(model.terr)
+
+# # Calculate Confidance Intervals of Model
+# newdata.terr <- data.frame(cbind(UL.sim$molecule, UL.sim$distance))
+# conf95.terr <- predict(model.terr, newdata.terr, interval="confidence")
+# 
+# # Dummy Variables Regression Model ("Terrestrial Influence")
+# D2 <- (UL.sim$molecule == "RNA")*1
+# fit.Fig.3b <- lm(UL.sim$bray.mean ~ UL.sim$distance + D2 + UL.sim$distance*D2)
+# D2.R2 <- round(summary(fit.Fig.3b)$r.squared, 2)
+# summary(fit.Fig.3b)
+# 
+# 
+# DNA.int.3b <- fit.Fig.3b$coefficients[1]
+# DNA.slp.3b <- fit.Fig.3b$coefficients[2]
+# RNA.int.3b <- DNA.int.3b + fit.Fig.3b$coefficients[3]
+# RNA.slp.3b <- DNA.slp.3b + fit.Fig.3b$coefficients[4]
+```
+
+
+```{r plot_similarity_to_soils, fig.asp = 3/4}
+similarity.plot <- UL.sim %>% 
+  mutate(molecule = ifelse(UL.sim$molecule == "DNA", "Total", "Active")) %>% 
+  ggplot(aes(x = distance, y = bray.mean, 
+             color = molecule, fill = molecule, shape = molecule)) +
+  geom_point(alpha = 0.8, size = 3, show.legend = T) + 
+  geom_smooth(method = "lm", show.legend = T, aes(linetype = molecule)) + 
+  labs(y = str_wrap("Similarity to soil community", width = 20), 
+       x = "Reservoir distance (m)") + 
+  scale_color_manual(values = my.cols) + 
+  scale_fill_manual(values = my.cols) +
+  theme(legend.position = "none") +
+  scale_x_reverse(limits = c(400,0)) + 
+  annotate(geom = "text", x = 0, .25, hjust = 1, vjust = 1, size = 5,
+           label = paste0("r^2== ",round(summary(model.terr)$r.squared, 2)), parse = T) +
+  annotate("text", x = 375, y = .065, label = "Active", size = 5) +
+  annotate("text", x = 375, y = .24, label = "Total", size = 5)
+
+similarity.plot
+```
+We find that our model captures most of the variation in community structure \((R^2 = `r summary(model.terr)$r.squared`)\). We note a significant influence of distance on community similarity and the presence of a significant interaction between distance and whether the comparison is for  active or total bacterial communities. This indicates that total communities decay faster with distance to soils than active communities do, which might be explained by the large difference in initial intercept. Active communities are always highly dissimilar to soil communities and remain so across the lake, while total lake communities are initially similar to soils, but this influence dissipates with distance into the reservoir. 
+
+### Create combined figure
+```{r combined-plots, fig.asp=2*3/4}
+plot_grid(alpha.fig + labs(x = ""), similarity.plot, 
+          align = "hv",
+          labels = "auto", ncol = 1)
+```
 
 
 ## How does community structure change along the gradient?
@@ -352,57 +443,6 @@ This could reflect a loss of soil-derived taxa in the aquatic samples.
 To test this, we'll look at \(\beta\)-diversity along the gradient with respect to the soil samples. 
 If we see a decay in similarity to soils, this suggests soil taxa are having a comparatively lower influence with distance from the inlet. 
 
-## Similarity To Terrestrial Habitat Across Gradient (Terrestrial Influence)
-Here, we fit a linear model to the similarity of the aquatic community to the soil community. 
-```{r tab_similarity_to_soils}
-# Similarity to Soil Sample
-UL.bray      <- 1-as.matrix(vegdist(OTUsREL.log, method="bray"))
-UL.bray.lake <- UL.bray[-c(1:3), 1:3] 
-bray.mean    <- round(apply(UL.bray.lake, 1, mean), 3)
-bray.se      <- round(apply(UL.bray.lake, 1, se), 3)
-UL.sim       <- cbind(design[-c(1:3), ], bray.mean, bray.se)
-
-# Calculate Linear Model
-model.terr <- lm(bray.mean ~ distance * molecule, data = UL.sim)
-pander(model.terr)
-
-# # Calculate Confidance Intervals of Model
-# newdata.terr <- data.frame(cbind(UL.sim$molecule, UL.sim$distance))
-# conf95.terr <- predict(model.terr, newdata.terr, interval="confidence")
-# 
-# # Dummy Variables Regression Model ("Terrestrial Influence")
-# D2 <- (UL.sim$molecule == "RNA")*1
-# fit.Fig.3b <- lm(UL.sim$bray.mean ~ UL.sim$distance + D2 + UL.sim$distance*D2)
-# D2.R2 <- round(summary(fit.Fig.3b)$r.squared, 2)
-# summary(fit.Fig.3b)
-# 
-# 
-# DNA.int.3b <- fit.Fig.3b$coefficients[1]
-# DNA.slp.3b <- fit.Fig.3b$coefficients[2]
-# RNA.int.3b <- DNA.int.3b + fit.Fig.3b$coefficients[3]
-# RNA.slp.3b <- DNA.slp.3b + fit.Fig.3b$coefficients[4]
-```
-
-
-```{r plot_similarity_to_soils, fig.asp = .618}
-similarity.plot <- UL.sim %>% 
-  mutate(molecule = ifelse(UL.sim$molecule == "DNA", "Total", "Active")) %>% 
-  ggplot(aes(x = distance, y = bray.mean, 
-             color = molecule, fill = molecule, shape = molecule)) +
-  geom_point(alpha = 0.8, size = 3, show.legend = T) + 
-  geom_smooth(method = "lm", show.legend = T, aes(linetype = molecule)) + 
-  labs(y = str_wrap("Similarity to soil community", width = 20), 
-       x = "Reservoir distance (m)") + 
-  scale_color_manual(values = my.cols) + 
-  scale_fill_manual(values = my.cols) +
-  theme(legend.position = c(0.85, 0.85)) +
-  scale_x_reverse(limits = c(400,0)) + 
-  annotate(geom = "text", x = 50, y = 0.15, size = 6,
-           label = paste0("r^2== ",round(summary(model.terr)$r.squared, 2)), parse = T) +
-  guides(fill = guide_legend(override.aes=list(fill=NA)))
-similarity.plot
-```
-We find that our model captures most of the variation in community structure \((R^2 = `r summary(model.terr)$r.squared`)\). We note a significant influence of distance on community similarity and the presence of a significant interaction between distance and whether the comparison is for  active or total bacterial communities. This indicates that total communities decay faster with distance to soils than active communities do, which might be explained by the large difference in initial intercept. Active communities are always highly dissimilar to soil communities and remain so across the lake, while total lake communities are initially similar to soils, but this influence dissipates with distance into the reservoir. 
 
 
 # Identifying the Soil Bacteria
@@ -475,7 +515,7 @@ pander(terr.mod1)
 ```
 We find distance is a highly significant predictor of the richness of these soil-derived taxa (on a log-scale). 
 
-```{r plot_transient, fig.asp = .618}
+```{r plot_transient, fig.asp = 3/4}
 transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$distance) %>% 
   ggplot(aes(x = distance, y = transient_rich)) + 
   geom_smooth(method = "lm", color = "black", fill = "grey") +
@@ -484,16 +524,9 @@ transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$dista
   scale_y_log10() +
   annotation_logticks(sides = "l") +
   labs(x = "Reservoir distance (m)",
-       y = "Richness of dormant \nsoil taxa in reservoir") +
+       y = "Dormant soil taxa in reservoir") +
   annotate("text", x = 50, y = 750, size = 6, label = paste0("r^2== ",T1.R2), parse = T) 
 transient.plot
-```
-
-
-
-```{r combine_plots, fig.asp = 1/.618}
-cowplot::plot_grid(similarity.plot, transient.plot, 
-                   labels = "auto", ncol = 1, align = "hv")
 ```
 
 
@@ -538,7 +571,7 @@ in.lake.to.plot <- as.data.frame(in.lake.core.not.soils.REL) %>%
 ```
 
 Now, lets plot the abundances of the OTUs across the reservoir and split them up into whether they were recovered in soils or not. 
-```{r coreplot, fig.asp=1/.618}
+```{r coreplot, fig.asp=2*3/4}
 bind_rows(in.soil.to.plot, in.lake.to.plot) %>% 
   ggplot(aes(x = distance, y = rel_abundance, group = otu_id)) + 
   labs(x = "Reservoir distance (m)", 
@@ -718,215 +751,55 @@ in.lake.core.soil.REL <- rowSums(in.lake.core.from.soils) / rowSums(w.dna)
 in.lake.core.water.REL <- rowSums(in.lake.core.not.soils) / rowSums(w.dna)
 ```
 
+# Are the "persistent" reservoir taxa really representative? Look over time...
+```{r time_series, fig.asp=1}
+total.OTUs <- read.otu(shared = shared, cutoff = "0.03")    # 97% Similarity
 
-## Taxonomic Analysis
-```{r, results="asis", eval=FALSE}
-# Taxa comprising total lake 'core', those from soils, and those not from soils
-core.taxa <- OTU.tax[OTU.tax$OTU %in% colnames(in.lake.core),]
+# Import Taxonomy
+total.OTU.tax <- read.tax(taxonomy = taxon, format = "rdp")
 
-core.soil.taxa <- OTU.tax[OTU.tax$OTU %in% colnames(in.lake.core.from.soils),]
-core.water.taxa <- OTU.tax[OTU.tax$OTU %in% colnames(in.lake.core.not.soils),]
+# Subset to just the time series sites
+UL.ts.OTUs <- total.OTUs[str_which(rownames(total.OTUs), "UL"),]
 
-# Get relative abundances for each of the core taxa 
-core.soil.taxa.DNA.REL <- OTUsREL[which(design$molecule == "DNA" & design$type == "water"),
-                                  as.numeric(rownames(core.soil.taxa))]
-core.water.taxa.DNA.REL <- OTUsREL[which(design$molecule == "DNA" & design$type == "water"),
-                                   as.numeric(rownames(core.water.taxa))]
-core.soil.taxa.RNA.REL <- OTUsREL[which(design$molecule == "RNA" & design$type == "water"),
-                                  as.numeric(rownames(core.soil.taxa))]
-core.water.taxa.RNA.REL <- OTUsREL[which(design$molecule == "RNA" & design$type == "water"),
-                                   as.numeric(rownames(core.water.taxa))]
-
-core.soil.taxa.DNA.REL.max <- as.matrix(apply(core.soil.taxa.DNA.REL, 2, max))
-core.soil.taxa.RNA.REL.max <- as.matrix(apply(core.soil.taxa.RNA.REL, 2, max))
-core.water.taxa.DNA.REL.max <- as.matrix(apply(core.water.taxa.DNA.REL, 2, max))
-core.water.taxa.RNA.REL.max <- as.matrix(apply(core.water.taxa.RNA.REL, 2, max))
-
-core.soil.taxa.DNA.REL.min <- as.matrix(apply(core.soil.taxa.DNA.REL, 2, min))
-core.soil.taxa.RNA.REL.min <- as.matrix(apply(core.soil.taxa.RNA.REL, 2, min))
-core.water.taxa.DNA.REL.min <- as.matrix(apply(core.water.taxa.DNA.REL, 2, min))
-core.water.taxa.RNA.REL.min <- as.matrix(apply(core.water.taxa.RNA.REL, 2, min))
-
-core.soil.taxa.DNA.REL.mean <- as.matrix(apply(core.soil.taxa.DNA.REL, 2, mean))
-core.soil.taxa.RNA.REL.mean <- as.matrix(apply(core.soil.taxa.RNA.REL, 2, mean))
-core.water.taxa.DNA.REL.mean <- as.matrix(apply(core.water.taxa.DNA.REL, 2, mean))
-core.water.taxa.RNA.REL.mean <- as.matrix(apply(core.water.taxa.RNA.REL, 2, mean))
-
-core.soil.taxa.soil.max <- as.matrix(apply(OTUsREL[which(design$type == "soil"), rownames(core.soil.taxa.DNA.REL.max)], MARGIN = 2, max))
-
-core.soil.taxa.DNA.REL.bounds <- cbind(core.soil.taxa.DNA.REL.min, core.soil.taxa.DNA.REL.max,
-                                       core.soil.taxa.RNA.REL.min, core.soil.taxa.RNA.REL.max,
-                                       core.soil.taxa.DNA.REL.mean, core.soil.taxa.RNA.REL.mean, 
-                                       core.soil.taxa.soil.max)
-
-colnames(core.soil.taxa.DNA.REL.bounds) <- c("DNA.min", "DNA.max", "RNA.min", "RNA.max", "DNA.mean", "RNA.mean", "Soil.max")
+# make sure OTU table matches up with design order
+UL.ts.design <- read_csv("data/UL_timeseries_design.csv")
+UL.ts.OTUs <- UL.ts.OTUs[match(UL.ts.design$sample.name, rownames(UL.ts.OTUs)),]
+UL.ts.OTUs.RNA <- decostand(UL.ts.OTUs[which(UL.ts.design$sample.type == "RNA"),], method = "total")
+UL.ts.OTUs.DNA <- decostand(UL.ts.OTUs[which(UL.ts.design$sample.type == "DNA"),], method = "total")
 
 
+env.ts.data <- read.table("data/ul-seedbank.env.txt", sep="\t", header=TRUE)
+env.ts.data$date <- as.Date(parse_date_time(env.ts.data$date, "m d y"))
+env.ts.data$doc[which(env.ts.data$doc == "**")] <- NA
+env.ts.data$doc <- as.numeric(env.ts.data$doc)
+summary(env.ts.data)
+UL.ts.design <- left_join(UL.ts.design, env.ts.data[,c("sample.id", "date")])
+env.ts.data <- env.ts.data[-which(!(env.ts.data$date %in% UL.ts.design$date)),]
 
-
-core.water.taxa.DNA.REL.bounds <- cbind(core.water.taxa.DNA.REL.min, core.water.taxa.DNA.REL.max,
-                                       core.water.taxa.RNA.REL.min, core.water.taxa.RNA.REL.max,
-                                       core.water.taxa.DNA.REL.mean, core.water.taxa.RNA.REL.mean)
-colnames(core.water.taxa.DNA.REL.bounds) <- c("DNA.min", "DNA.max", "RNA.min", "RNA.max", "DNA.mean", "RNA.mean")
-
-# core.soil and core.water are summaries of lake core
-core.soil <- as.data.frame(cbind(core.soil.taxa$Family, core.soil.taxa$Genus,
-                                 signif(core.soil.taxa.DNA.REL.bounds[,c(1:4, 7)], digits = 3)))
-colnames(core.soil) <- c("Family", "Genus", "DNA.min", "DNA.max", "RNA.min", "RNA.max", "Soil.max")
-core.water <- as.data.frame(cbind(core.water.taxa$Family, core.water.taxa$Genus, 
-                                  signif(core.water.taxa.DNA.REL.bounds[,1:4], digits = 3)))
-colnames(core.water) <- c("Family", "Genus", "DNA.min", "DNA.max", "RNA.min", "RNA.max")
-
-# Core Soil LaTeX Table
-addtorow <- list()
-addtorow$pos <- list(0, 0)
-addtorow$command <- c("& \\multicolumn{1}{c}{Class} & \\multicolumn{1}{c}{Order} & 
-                      \\multicolumn{2}{c}{DNA} & \\multicolumn{2}{c}{RNA} \\\\\n", 
-                      "& &  & min & max & min & max \\\\\n")
-core.soil.tab <- xtable(core.soil)
-align(core.soil.tab) <- "crrrrrrr"
-print(core.soil.tab, add.to.row = addtorow, include.colnames = FALSE, 
-      type= "latex", file="tables/table1.tex")
-print(core.soil.tab, add.to.row = addtorow, include.colnames = FALSE, comment = FALSE)
-
-core.water.tab <- xtable(core.water)
-align(core.water.tab) <- "crrrrrr"
-print(core.water.tab, add.to.row = addtorow, include.colnames = FALSE, 
-      type= "latex", file="tables/table2.tex")
-print(core.water.tab, add.to.row = addtorow, include.colnames = FALSE, comment = FALSE)
-
-```
-
-
-## Comparisons of relabunds
-Now, lets see which taxa increase or decrease substantially along the gradient. 
-I calculated the fold change in relative abundance of all these taxa along the gradient relative to their max abundance in soils.
-Thus, the OTUs that are most abundant near the soils will have a declining slope toward the dam. 
-The OTUs that are perhaps seeded from the soils into the lake will have an increasing slope toward the dam. 
-```{r, fold_change_plot, eval = FALSE}
-high.activity.soil.core <- as.data.frame(core.soil.taxa.DNA.REL.bounds) %>%
-  rownames_to_column("OTU") %>% 
-  filter(RNA.max > 0) %>% arrange(desc(RNA.max)) %>% 
-  left_join(OTU.tax)
-high.activity.water.core <- as.data.frame(core.water.taxa.DNA.REL.bounds) %>%
-  rownames_to_column("OTU") %>% 
-  filter(RNA.max > 0) %>% arrange(desc(RNA.max)) %>% 
-  left_join(OTU.tax)
-
-mean.soil.abunds.soil.core <- OTUsREL[which(design$type == "soil"), high.activity.soil.core$OTU] %>% 
-  colMeans %>% data.frame(mean_soil_relabund = .) %>% 
-  rownames_to_column("OTU") %>% arrange(desc(mean_soil_relabund))
-max.soil.abunds.soil.core <- OTUsREL[which(design$type == "soil"), high.activity.soil.core$OTU] %>% 
-  apply(X = ., MARGIN = 2, max) %>% data.frame(max_soil_relabund = .) %>% 
-  rownames_to_column("OTU") %>% arrange(desc(max_soil_relabund))
-
-mean.soil.abunds.water.core <- OTUsREL[which(design$type == "soil"), high.activity.water.core$OTU] %>% 
-  colMeans %>% data.frame(mean_soil_relabund = .) %>% 
-  rownames_to_column("OTU") %>% arrange(desc(mean_soil_relabund))
-max.soil.abunds.water.core <- OTUsREL[which(design$type == "soil"), high.activity.water.core$OTU] %>% 
-  apply(X = ., MARGIN = 2, max) %>% data.frame(max_soil_relabund = .) %>% 
-  rownames_to_column("OTU") %>% arrange(desc(max_soil_relabund))
-
-
-soil.vs.lake.abunds <- high.activity.soil.core %>% 
-  left_join(mean.soil.abunds.soil.core) %>% left_join(max.soil.abunds.soil.core) %>% 
-  mutate(soil_is_source = ifelse(max_soil_relabund > 1e-3 & RNA.max > 1e-3, T, F)) %>% 
-  mutate(Taxon = ifelse(Genus == "unclassified", paste(Family, "sp."), Genus))
-
-combined.relabunds <- max.soil.abunds.soil.core %>%
-  left_join(rownames_to_column(as.data.frame(t(in.lake.core.from.soils.REL)), "OTU"))
-rownames(combined.relabunds) <- combined.relabunds$OTU
-combined.relabunds <- combined.relabunds[,-1]
-
-otus.fold.change <- na.omit(combined.relabunds / combined.relabunds$max_soil_relabund) # Calculate fold changes
-
-fold_change_summary <- otus.fold.change %>% rownames_to_column("OTU") %>% 
-  select(-max_soil_relabund) %>% 
-  gather("sample", "fold_change", -OTU) %>% 
-  left_join(select(rownames_to_column(design.dna, "sample"), -station, -molecule, -type)) %>% 
-  group_by(OTU) %>% 
-  summarize(max_change = max(fold_change), min_change = min(fold_change))
-
-otus.fold.change %>% rownames_to_column("OTU") %>% 
-  select(-max_soil_relabund) %>% 
-  gather("sample", "fold_change", -OTU) %>% 
-  left_join(select(rownames_to_column(design.dna, "sample"), -station, -molecule, -type)) %>% 
-  ggplot(aes(x = distance, y = fold_change, color = OTU)) + 
-  geom_hline(aes(yintercept = 1), color = "gray50", alpha = 0.5, size = 2) +
-  geom_jitter(alpha = 0.05) + 
-  geom_smooth(alpha = 0.5, method = "lm", se = F) + 
-  scale_y_log10(labels = scales::comma) +
-  scale_x_reverse() +
-  annotation_logticks(long = unit(.1, "in"), sides = "l") +
-  theme(legend.position = "none") +
-  labs(x = "Reservoir Transect (m)", y = "Fold-change in abundance")
-
-# otus.fold.change %>% rownames_to_column("OTU") %>% 
-#   select(-max_soil_relabund) %>% 
-#   gather("sample", "fold_change", -OTU) %>% 
-#   left_join(select(rownames_to_column(design.dna, "sample"), -station, -molecule, -type))
-
-foldchanges <- t(otus.fold.change)[-1,]
-foldchangelms <- apply(foldchanges, MARGIN = 2, 
-    FUN = function(x) summary(lm(x ~ design.dna$distance))$coefficients[c(1,2,8)])
-rownames(foldchangelms) <- c("intercept", "slope", "pval")
-
-soil.core.decresing <- as.data.frame(t(foldchangelms)) %>% 
-  rownames_to_column("OTU") %>% 
-  filter( slope > 0) %>%   # rel abund decreases toward dam
-  left_join(OTU.tax) %>% select(-intercept, -slope, -pval, everything()) %>% 
-  arrange(desc(slope))
-soil.core.increasing <- as.data.frame(t(foldchangelms)) %>% 
-  rownames_to_column("OTU") %>% 
-  filter( slope < 0) %>%   # rel abund increases toward dam
-  left_join(OTU.tax) %>% select(-intercept, -slope, -pval, everything()) %>% 
-  arrange((slope))
+OTUs.in.core <- UL.ts.OTUs.RNA[, which(colnames(UL.ts.OTUs) %in% df.plot$OTU)]
+cbind.data.frame(UL.ts.design[which(UL.ts.design$sample.type == "RNA"),], OTUs.in.core) %>% as_tibble() %>% 
+  gather(-sample.name, -sample.type, -sample.id, -date, key = OTU, value = rel_abund) %>% 
+  mutate(soils = ifelse(OTU %in% unique(c(df2$OTU, df3$OTU)), 
+                        "Present in soils", "Absent from soils")) %>% 
+  mutate(change = ifelse(OTU %in% unique(c(df3$OTU, df4$OTU)), 
+                        "Decreasing", "Increasing")) %>% 
+  mutate(rel_abund = ifelse(rel_abund == 0, 1e-6, rel_abund)) %>% 
+  ggplot(aes(x = date, y = rel_abund, group = OTU)) +
+  geom_point(alpha = .1) + 
+  geom_line(stat = "smooth", method = "loess", color = "blue",
+            alpha = 0.5, span = .5, se = F) +
+  geom_vline(aes(xintercept = as_date("2013-07-15"))) +
+  scale_y_log10() + 
+  scale_x_date(labels = scales::date_format(format = "%b %y")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  facet_grid(soils ~ change) +
+  labs(x = "",
+       y = "Relative abundance")
   
-soil.decrease.tab <- soil.core.decresing %>% select(-OTU, -Domain) %>%  flextable()
-soil.increase.tab <- soil.core.increasing %>% select(-OTU, -Domain) %>% flextable()
-
-read_docx() %>% 
-  body_end_section_continuous() %>% 
-  body_add_par("Increasing away from stream inlet", style = "heading 2") %>% 
-  body_add_flextable(soil.increase.tab) %>% 
-  body_add_par("Decreasing away from stream inlet", style = "heading 2") %>% 
-  body_add_flextable(soil.decrease.tab) %>% 
-  body_end_section_landscape() %>% 
-  print(target = "tables/soil-core-change-tables.docx")
+  
 ```
+Many of them do appear to track the seasons quite well, suggesting there could be a seasonality component to the role of terrestrial inputs into the reservoir. 
 
-## Word Table
-```{r, eval = FALSE}
-soil.tab <- core.soil %>% arrange(desc(RNA.max)) %>% flextable() %>% autofit()
-water.tab <- core.water %>% arrange(desc(RNA.max)) %>% flextable() %>% autofit()
-
-read_docx() %>% 
-  body_add_par("Table S1", style = "heading 1") %>% 
-  body_end_section_continuous() %>% 
-  body_add_par("Core Reservoir Microbiome (present in soils)", style = "heading 2") %>% 
-  body_add_flextable(soil.tab) %>% 
-  body_add_par("Core Reservoir Microbiome (absent from soils)", style = "heading 2") %>% 
-  body_add_flextable(water.tab) %>% 
-  body_end_section_landscape() %>% 
-  print(target = "tables/core_tables.docx")
-```
-
-## Soil vs. Lake Comparisons
-```{r soil_lake_plot, fig.asp=1, eval = FALSE}
-soil.vs.lake.abunds %>% 
-  mutate(Genus = str_replace(Genus, "_unclassified", " sp.")) %>% 
-  filter(max_soil_relabund > 0) %>% 
-  ggplot(aes(x = max_soil_relabund, y = RNA.max)) +
-  geom_vline(xintercept = 1e-3, alpha = 0.1) +
-  geom_hline(yintercept = 1e-3, alpha = 0.1) +
-  geom_jitter(size = 3, alpha = 0.5, show.legend = F) +
-  scale_x_log10(lim = c(1e-6, 1e-2)) + 
-  scale_y_log10(lim = c(1e-5, 1)) +
-  annotation_logticks(long = unit(.1, "in")) +
-  scale_color_manual(values = my.cols) +
-  labs(x = "Max Soil Relative Abundance", y = "Max Lake RNA \nRelative Abundance") +
-  geom_text_repel(size = 4.5, aes(label = Genus), force = 1.5, alpha = 0.9, segment.alpha = 0.8, box.padding = .75, max.iter = 100000)
-```
 
 # Not-included
 ## Ecosystem functions

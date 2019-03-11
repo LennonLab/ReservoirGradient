@@ -125,7 +125,7 @@ Lennon}
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{01 March, 2019}
+    \date{11 March, 2019}
 
 \usepackage{array}
 \usepackage{graphics}
@@ -174,6 +174,7 @@ some other functions.
 \KeywordTok{library}\NormalTok{(}\StringTok{"broom"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"ggpmisc"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"pander"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"lubridate"}\NormalTok{)}
 
 \KeywordTok{source}\NormalTok{(}\StringTok{"bin/mothur_tools.R"}\NormalTok{)}
 \NormalTok{se <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, ...)\{}\KeywordTok{sd}\NormalTok{(x, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}\OperatorTok{/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{length}\NormalTok{(}\KeywordTok{na.omit}\NormalTok{(x)))\}}
@@ -570,34 +571,58 @@ distance:moleculeRNA\strut
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{hill.estim }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\CommentTok{# hill.estim %>% filter(type == "water") %>% }
+\CommentTok{#   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% }
+\CommentTok{#   ggplot(aes(x = distance, y = Estimator, }
+\CommentTok{#              ymin = LCL, ymax = UCL,}
+\CommentTok{#              color = molecule, fill = molecule, shape = molecule)) + }
+\CommentTok{#   geom_point(size =3) + }
+\CommentTok{#   # geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), }
+\CommentTok{#   #                width = 10, alpha = 0.5) +}
+\CommentTok{#   geom_smooth(method = "lm", aes(linetype = molecule)) +}
+\CommentTok{#   labs(x = "Reservoir distance (m)",}
+\CommentTok{#        y = "") +}
+\CommentTok{#   scale_color_manual(values = my.cols) +}
+\CommentTok{#   scale_fill_manual(values = my.cols) + }
+\CommentTok{#   theme(legend.position = c(.88,.95), strip.placement = "outside",}
+\CommentTok{#         strip.text = element_text(size = 16)) +}
+\CommentTok{#   scale_x_reverse() +}
+\CommentTok{#   facet_grid(Diversity ~ ., scales = "free", switch = "y") +}
+\CommentTok{#   guides(fill = guide_legend(override.aes=list(fill=NA)))}
+  \CommentTok{#facet_grid(Diversity ~ ., scales = "free")}
+
+\CommentTok{# postitions for labels}
+\NormalTok{xpos =}\StringTok{ }\KeywordTok{max}\NormalTok{((}\KeywordTok{na.omit}\NormalTok{(hill.estim}\OperatorTok{$}\NormalTok{distance)))}
+\NormalTok{yposDNA =}\StringTok{ }\KeywordTok{predict}\NormalTok{(hill.water.mod.rich, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{distance =} \DecValTok{400}\NormalTok{, }\DataTypeTok{molecule =} \StringTok{"DNA"}\NormalTok{))}
+\NormalTok{yposRNA =}\StringTok{ }\KeywordTok{predict}\NormalTok{(hill.water.mod.rich, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{distance =} \DecValTok{400}\NormalTok{, }\DataTypeTok{molecule =} \StringTok{"RNA"}\NormalTok{))}
+\NormalTok{alpha.fig <-}\StringTok{ }\NormalTok{hill.estim }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{, Diversity }\OperatorTok{==}\StringTok{ "Species richness"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{molecule =} \KeywordTok{ifelse}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{, }\StringTok{"Total"}\NormalTok{, }\StringTok{"Active"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ Estimator, }
              \DataTypeTok{ymin =}\NormalTok{ LCL, }\DataTypeTok{ymax =}\NormalTok{ UCL,}
              \DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{fill =}\NormalTok{ molecule, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =}\DecValTok{3}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =}\DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\CommentTok{# geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), }
 \StringTok{  }\CommentTok{#                width = 10, alpha = 0.5) +}
 \StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{linetype =}\NormalTok{ molecule)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
-       \DataTypeTok{y =} \StringTok{""}\NormalTok{) }\OperatorTok{+}
+       \DataTypeTok{y =} \StringTok{"Estimated richness"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{,}\DecValTok{0}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{breaks =} \KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{3000}\NormalTok{, }\DataTypeTok{by =} \DecValTok{500}\NormalTok{)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \KeywordTok{c}\NormalTok{(.}\DecValTok{88}\NormalTok{,.}\DecValTok{95}\NormalTok{), }\DataTypeTok{strip.placement =} \StringTok{"outside"}\NormalTok{,}
-        \DataTypeTok{strip.text =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{size =} \DecValTok{16}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(Diversity }\OperatorTok{~}\StringTok{ }\NormalTok{., }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{, }\DataTypeTok{switch =} \StringTok{"y"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \KeywordTok{guide_legend}\NormalTok{(}\DataTypeTok{override.aes=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{fill=}\OtherTok{NA}\NormalTok{)))}
+\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \KeywordTok{guide_legend}\NormalTok{(}\DataTypeTok{override.aes=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{fill=}\OtherTok{NA}\NormalTok{))) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ yposRNA }\OperatorTok{+}\StringTok{ }\DecValTok{300}\NormalTok{, }
+           \DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ yposDNA }\OperatorTok{+}\StringTok{ }\DecValTok{300}\NormalTok{, }
+           \DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \DecValTok{2750}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
+           \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,}\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(hill.water.mod.rich)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)), }\DataTypeTok{parse =}\NormalTok{ T)}
+\NormalTok{alpha.fig}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/hill_div_plot-1} \end{center}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-  \CommentTok{#facet_grid(Diversity ~ ., scales = "free")}
-\end{Highlighting}
-\end{Shaded}
 
 So, from the basis of these results, we can make the following
 conclusions. First, we note that diversity in the total community decays
@@ -616,64 +641,6 @@ transect is driven primarily by rare taxa. However, the general trend of
 higher Simpson diversity across the whole transect suggests that
 low-activity, but relatively common, taxa are maintained in the
 reservoir.
-
-\subsection{How does community structure change along the
-gradient?}\label{how-does-community-structure-change-along-the-gradient}
-
-First, we'll just get an overview of how the communities look along the
-aquatic transect.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{ul.pcoa <-}\StringTok{ }\KeywordTok{cmdscale}\NormalTok{(}\KeywordTok{vegdist}\NormalTok{(OTUsREL.log, }\DataTypeTok{method=}\StringTok{"bray"}\NormalTok{), }\DecValTok{2}\NormalTok{, }\DataTypeTok{eig =}\NormalTok{ T, }\DataTypeTok{add =}\NormalTok{ T)}
-\NormalTok{explainvars <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{eigenvals}\NormalTok{(ul.pcoa)[}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)]}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(}\KeywordTok{eigenvals}\NormalTok{(ul.pcoa)),}\DecValTok{3}\NormalTok{) }\OperatorTok{*}\DecValTok{100}
-\NormalTok{water.pcvals <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{)}
-\NormalTok{soil.pcvals <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{)}
-\NormalTok{pc_dists <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(}
-  \DataTypeTok{DNA_dim1 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim1,}
-  \DataTypeTok{DNA_dim2 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim2,}
-  \DataTypeTok{RNA_dim1 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim1,}
-  \DataTypeTok{RNA_dim2 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim2)}
-\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{molecule =} \KeywordTok{ifelse}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{, }\StringTok{"Total"}\NormalTok{, }\StringTok{"Active"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Dim1, }\DataTypeTok{y =}\NormalTok{ Dim2)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_path}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{arrow =} \KeywordTok{arrow}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{20}\NormalTok{,}
-                          \DataTypeTok{length =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.35}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
-                          \DataTypeTok{type =} \StringTok{"closed"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{linetype =}\NormalTok{ molecule)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{select}\NormalTok{(soil.pcvals, Dim1, Dim2), }\DataTypeTok{col =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\StringTok{"Community Subset"}\NormalTok{, }\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_segment}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ pc_dists,}
-               \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ DNA_dim1, }\DataTypeTok{y =}\NormalTok{ DNA_dim2,}
-                   \DataTypeTok{xend =}\NormalTok{ RNA_dim1, }\DataTypeTok{yend =}\NormalTok{ RNA_dim2),}
-               \DataTypeTok{alpha =} \DecValTok{0}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{coord_fixed}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 1 ("}\NormalTok{, explainvars[}\DecValTok{1}\NormalTok{],}\StringTok{"%)"}\NormalTok{),}
-       \DataTypeTok{y =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 2 ("}\NormalTok{, explainvars[}\DecValTok{2}\NormalTok{],}\StringTok{"%)"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \OperatorTok{-}\NormalTok{.}\DecValTok{25}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{3}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{3}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{4}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Soils"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/ordination-1} \end{center}
-
-So, it appears that there is convergence in community structure along
-the path from stream inlet to the dam. This could reflect a loss of
-soil-derived taxa in the aquatic samples. To test this, we'll look at
-\(\beta\)-diversity along the gradient with respect to the soil samples.
-If we see a decay in similarity to soils, this suggests soil taxa are
-having a comparatively lower influence with distance from the inlet.
 
 \subsection{Similarity To Terrestrial Habitat Across Gradient
 (Terrestrial
@@ -807,11 +774,13 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
        \DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \KeywordTok{c}\NormalTok{(}\FloatTok{0.85}\NormalTok{, }\FloatTok{0.85}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{,}\DecValTok{0}\NormalTok{)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{50}\NormalTok{, }\DataTypeTok{y =} \FloatTok{0.15}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{,}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, .}\DecValTok{25}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
            \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,}\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(model.terr)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)), }\DataTypeTok{parse =}\NormalTok{ T) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{fill =} \KeywordTok{guide_legend}\NormalTok{(}\DataTypeTok{override.aes=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{fill=}\OtherTok{NA}\NormalTok{)))}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ .}\DecValTok{065}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ .}\DecValTok{24}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{)}
+
 \NormalTok{similarity.plot}
 \end{Highlighting}
 \end{Shaded}
@@ -829,6 +798,76 @@ communities are always highly dissimilar to soil communities and remain
 so across the lake, while total lake communities are initially similar
 to soils, but this influence dissipates with distance into the
 reservoir.
+
+\subsubsection{Create combined figure}\label{create-combined-figure}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot_grid}\NormalTok{(alpha.fig }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{), similarity.plot, }
+          \DataTypeTok{align =} \StringTok{"hv"}\NormalTok{,}
+          \DataTypeTok{labels =} \StringTok{"auto"}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/combined-plots-1} \end{center}
+
+\subsection{How does community structure change along the
+gradient?}\label{how-does-community-structure-change-along-the-gradient}
+
+First, we'll just get an overview of how the communities look along the
+aquatic transect.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ul.pcoa <-}\StringTok{ }\KeywordTok{cmdscale}\NormalTok{(}\KeywordTok{vegdist}\NormalTok{(OTUsREL.log, }\DataTypeTok{method=}\StringTok{"bray"}\NormalTok{), }\DecValTok{2}\NormalTok{, }\DataTypeTok{eig =}\NormalTok{ T, }\DataTypeTok{add =}\NormalTok{ T)}
+\NormalTok{explainvars <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{eigenvals}\NormalTok{(ul.pcoa)[}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{)]}\OperatorTok{/}\KeywordTok{sum}\NormalTok{(}\KeywordTok{eigenvals}\NormalTok{(ul.pcoa)),}\DecValTok{3}\NormalTok{) }\OperatorTok{*}\DecValTok{100}
+\NormalTok{water.pcvals <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{)}
+\NormalTok{soil.pcvals <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{)}
+\NormalTok{pc_dists <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(}
+  \DataTypeTok{DNA_dim1 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim1,}
+  \DataTypeTok{DNA_dim2 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim2,}
+  \DataTypeTok{RNA_dim1 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim1,}
+  \DataTypeTok{RNA_dim2 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim2)}
+\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{molecule =} \KeywordTok{ifelse}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{, }\StringTok{"Total"}\NormalTok{, }\StringTok{"Active"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Dim1, }\DataTypeTok{y =}\NormalTok{ Dim2)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_path}\NormalTok{(}\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{arrow =} \KeywordTok{arrow}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{20}\NormalTok{,}
+                          \DataTypeTok{length =} \KeywordTok{unit}\NormalTok{(}\FloatTok{0.35}\NormalTok{, }\StringTok{"cm"}\NormalTok{),}
+                          \DataTypeTok{type =} \StringTok{"closed"}\NormalTok{), }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{linetype =}\NormalTok{ molecule)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =} \KeywordTok{select}\NormalTok{(soil.pcvals, Dim1, Dim2), }\DataTypeTok{col =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\StringTok{"Community Subset"}\NormalTok{, }\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_segment}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ pc_dists,}
+               \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ DNA_dim1, }\DataTypeTok{y =}\NormalTok{ DNA_dim2,}
+                   \DataTypeTok{xend =}\NormalTok{ RNA_dim1, }\DataTypeTok{yend =}\NormalTok{ RNA_dim2),}
+               \DataTypeTok{alpha =} \DecValTok{0}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_fixed}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 1 ("}\NormalTok{, explainvars[}\DecValTok{1}\NormalTok{],}\StringTok{"%)"}\NormalTok{),}
+       \DataTypeTok{y =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 2 ("}\NormalTok{, explainvars[}\DecValTok{2}\NormalTok{],}\StringTok{"%)"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \OperatorTok{-}\NormalTok{.}\DecValTok{25}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{3}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{3}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{4}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Soils"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/ordination-1} \end{center}
+
+So, it appears that there is convergence in community structure along
+the path from stream inlet to the dam. This could reflect a loss of
+soil-derived taxa in the aquatic samples. To test this, we'll look at
+\(\beta\)-diversity along the gradient with respect to the soil samples.
+If we see a decay in similarity to soils, this suggests soil taxa are
+having a comparatively lower influence with distance from the inlet.
 
 \section{Identifying the Soil
 Bacteria}\label{identifying-the-soil-bacteria}
@@ -1055,22 +1094,13 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{() }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{sides =} \StringTok{"l"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
-       \DataTypeTok{y =} \StringTok{"Richness of dormant }\CharTok{\textbackslash{}n}\StringTok{soil taxa in reservoir"}\NormalTok{) }\OperatorTok{+}
+       \DataTypeTok{y =} \StringTok{"Dormant soil taxa in reservoir"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{50}\NormalTok{, }\DataTypeTok{y =} \DecValTok{750}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{, }\DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,T1.R2), }\DataTypeTok{parse =}\NormalTok{ T) }
 \NormalTok{transient.plot}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/plot_transient-1} \end{center}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{cowplot}\OperatorTok{::}\KeywordTok{plot_grid}\NormalTok{(similarity.plot, transient.plot, }
-                   \DataTypeTok{labels =} \StringTok{"auto"}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{, }\DataTypeTok{align =} \StringTok{"hv"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/combine_plots-1} \end{center}
 
 \section{What is the fate of soil-derived taxa in the
 reservoir?}\label{what-is-the-fate-of-soil-derived-taxa-in-the-reservoir}
@@ -2543,227 +2573,102 @@ Luteolibacter\strut
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{Taxonomic Analysis}\label{taxonomic-analysis}
+\section{\texorpdfstring{Are the ``persistent'' reservoir taxa really
+representative? Look over
+time\ldots{}}{Are the persistent reservoir taxa really representative? Look over time\ldots{}}}\label{are-the-persistent-reservoir-taxa-really-representative-look-over-time}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Taxa comprising total lake 'core', those from soils, and those not from soils}
-\NormalTok{core.taxa <-}\StringTok{ }\NormalTok{OTU.tax[OTU.tax}\OperatorTok{$}\NormalTok{OTU }\OperatorTok{%in%}\StringTok{ }\KeywordTok{colnames}\NormalTok{(in.lake.core),]}
+\NormalTok{total.OTUs <-}\StringTok{ }\KeywordTok{read.otu}\NormalTok{(}\DataTypeTok{shared =}\NormalTok{ shared, }\DataTypeTok{cutoff =} \StringTok{"0.03"}\NormalTok{)    }\CommentTok{# 97% Similarity}
 
-\NormalTok{core.soil.taxa <-}\StringTok{ }\NormalTok{OTU.tax[OTU.tax}\OperatorTok{$}\NormalTok{OTU }\OperatorTok{%in%}\StringTok{ }\KeywordTok{colnames}\NormalTok{(in.lake.core.from.soils),]}
-\NormalTok{core.water.taxa <-}\StringTok{ }\NormalTok{OTU.tax[OTU.tax}\OperatorTok{$}\NormalTok{OTU }\OperatorTok{%in%}\StringTok{ }\KeywordTok{colnames}\NormalTok{(in.lake.core.not.soils),]}
+\CommentTok{# Import Taxonomy}
+\NormalTok{total.OTU.tax <-}\StringTok{ }\KeywordTok{read.tax}\NormalTok{(}\DataTypeTok{taxonomy =}\NormalTok{ taxon, }\DataTypeTok{format =} \StringTok{"rdp"}\NormalTok{)}
 
-\CommentTok{# Get relative abundances for each of the core taxa }
-\NormalTok{core.soil.taxa.DNA.REL <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "DNA"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{),}
-                                  \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(core.soil.taxa))]}
-\NormalTok{core.water.taxa.DNA.REL <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "DNA"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{),}
-                                   \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(core.water.taxa))]}
-\NormalTok{core.soil.taxa.RNA.REL <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "RNA"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{),}
-                                  \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(core.soil.taxa))]}
-\NormalTok{core.water.taxa.RNA.REL <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "RNA"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{),}
-                                   \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(core.water.taxa))]}
+\CommentTok{# Subset to just the time series sites}
+\NormalTok{UL.ts.OTUs <-}\StringTok{ }\NormalTok{total.OTUs[}\KeywordTok{str_which}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(total.OTUs), }\StringTok{"UL"}\NormalTok{),]}
 
-\NormalTok{core.soil.taxa.DNA.REL.max <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.soil.taxa.DNA.REL, }\DecValTok{2}\NormalTok{, max))}
-\NormalTok{core.soil.taxa.RNA.REL.max <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.soil.taxa.RNA.REL, }\DecValTok{2}\NormalTok{, max))}
-\NormalTok{core.water.taxa.DNA.REL.max <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.water.taxa.DNA.REL, }\DecValTok{2}\NormalTok{, max))}
-\NormalTok{core.water.taxa.RNA.REL.max <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.water.taxa.RNA.REL, }\DecValTok{2}\NormalTok{, max))}
-
-\NormalTok{core.soil.taxa.DNA.REL.min <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.soil.taxa.DNA.REL, }\DecValTok{2}\NormalTok{, min))}
-\NormalTok{core.soil.taxa.RNA.REL.min <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.soil.taxa.RNA.REL, }\DecValTok{2}\NormalTok{, min))}
-\NormalTok{core.water.taxa.DNA.REL.min <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.water.taxa.DNA.REL, }\DecValTok{2}\NormalTok{, min))}
-\NormalTok{core.water.taxa.RNA.REL.min <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.water.taxa.RNA.REL, }\DecValTok{2}\NormalTok{, min))}
-
-\NormalTok{core.soil.taxa.DNA.REL.mean <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.soil.taxa.DNA.REL, }\DecValTok{2}\NormalTok{, mean))}
-\NormalTok{core.soil.taxa.RNA.REL.mean <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.soil.taxa.RNA.REL, }\DecValTok{2}\NormalTok{, mean))}
-\NormalTok{core.water.taxa.DNA.REL.mean <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.water.taxa.DNA.REL, }\DecValTok{2}\NormalTok{, mean))}
-\NormalTok{core.water.taxa.RNA.REL.mean <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(core.water.taxa.RNA.REL, }\DecValTok{2}\NormalTok{, mean))}
-
-\NormalTok{core.soil.taxa.soil.max <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{apply}\NormalTok{(OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{), }\KeywordTok{rownames}\NormalTok{(core.soil.taxa.DNA.REL.max)], }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, max))}
-
-\NormalTok{core.soil.taxa.DNA.REL.bounds <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(core.soil.taxa.DNA.REL.min, core.soil.taxa.DNA.REL.max,}
-\NormalTok{                                       core.soil.taxa.RNA.REL.min, core.soil.taxa.RNA.REL.max,}
-\NormalTok{                                       core.soil.taxa.DNA.REL.mean, core.soil.taxa.RNA.REL.mean, }
-\NormalTok{                                       core.soil.taxa.soil.max)}
-
-\KeywordTok{colnames}\NormalTok{(core.soil.taxa.DNA.REL.bounds) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"DNA.min"}\NormalTok{, }\StringTok{"DNA.max"}\NormalTok{, }\StringTok{"RNA.min"}\NormalTok{, }\StringTok{"RNA.max"}\NormalTok{, }\StringTok{"DNA.mean"}\NormalTok{, }\StringTok{"RNA.mean"}\NormalTok{, }\StringTok{"Soil.max"}\NormalTok{)}
+\CommentTok{# make sure OTU table matches up with design order}
+\NormalTok{UL.ts.design <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"data/UL_timeseries_design.csv"}\NormalTok{)}
+\NormalTok{UL.ts.OTUs <-}\StringTok{ }\NormalTok{UL.ts.OTUs[}\KeywordTok{match}\NormalTok{(UL.ts.design}\OperatorTok{$}\NormalTok{sample.name, }\KeywordTok{rownames}\NormalTok{(UL.ts.OTUs)),]}
+\NormalTok{UL.ts.OTUs.RNA <-}\StringTok{ }\KeywordTok{decostand}\NormalTok{(UL.ts.OTUs[}\KeywordTok{which}\NormalTok{(UL.ts.design}\OperatorTok{$}\NormalTok{sample.type }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{),], }\DataTypeTok{method =} \StringTok{"total"}\NormalTok{)}
+\NormalTok{UL.ts.OTUs.DNA <-}\StringTok{ }\KeywordTok{decostand}\NormalTok{(UL.ts.OTUs[}\KeywordTok{which}\NormalTok{(UL.ts.design}\OperatorTok{$}\NormalTok{sample.type }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{),], }\DataTypeTok{method =} \StringTok{"total"}\NormalTok{)}
 
 
-
-
-\NormalTok{core.water.taxa.DNA.REL.bounds <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(core.water.taxa.DNA.REL.min, core.water.taxa.DNA.REL.max,}
-\NormalTok{                                       core.water.taxa.RNA.REL.min, core.water.taxa.RNA.REL.max,}
-\NormalTok{                                       core.water.taxa.DNA.REL.mean, core.water.taxa.RNA.REL.mean)}
-\KeywordTok{colnames}\NormalTok{(core.water.taxa.DNA.REL.bounds) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"DNA.min"}\NormalTok{, }\StringTok{"DNA.max"}\NormalTok{, }\StringTok{"RNA.min"}\NormalTok{, }\StringTok{"RNA.max"}\NormalTok{, }\StringTok{"DNA.mean"}\NormalTok{, }\StringTok{"RNA.mean"}\NormalTok{)}
-
-\CommentTok{# core.soil and core.water are summaries of lake core}
-\NormalTok{core.soil <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(core.soil.taxa}\OperatorTok{$}\NormalTok{Family, core.soil.taxa}\OperatorTok{$}\NormalTok{Genus,}
-                                 \KeywordTok{signif}\NormalTok{(core.soil.taxa.DNA.REL.bounds[,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{, }\DecValTok{7}\NormalTok{)], }\DataTypeTok{digits =} \DecValTok{3}\NormalTok{)))}
-\KeywordTok{colnames}\NormalTok{(core.soil) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Family"}\NormalTok{, }\StringTok{"Genus"}\NormalTok{, }\StringTok{"DNA.min"}\NormalTok{, }\StringTok{"DNA.max"}\NormalTok{, }\StringTok{"RNA.min"}\NormalTok{, }\StringTok{"RNA.max"}\NormalTok{, }\StringTok{"Soil.max"}\NormalTok{)}
-\NormalTok{core.water <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(core.water.taxa}\OperatorTok{$}\NormalTok{Family, core.water.taxa}\OperatorTok{$}\NormalTok{Genus, }
-                                  \KeywordTok{signif}\NormalTok{(core.water.taxa.DNA.REL.bounds[,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{], }\DataTypeTok{digits =} \DecValTok{3}\NormalTok{)))}
-\KeywordTok{colnames}\NormalTok{(core.water) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Family"}\NormalTok{, }\StringTok{"Genus"}\NormalTok{, }\StringTok{"DNA.min"}\NormalTok{, }\StringTok{"DNA.max"}\NormalTok{, }\StringTok{"RNA.min"}\NormalTok{, }\StringTok{"RNA.max"}\NormalTok{)}
-
-\CommentTok{# Core Soil LaTeX Table}
-\NormalTok{addtorow <-}\StringTok{ }\KeywordTok{list}\NormalTok{()}
-\NormalTok{addtorow}\OperatorTok{$}\NormalTok{pos <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{)}
-\NormalTok{addtorow}\OperatorTok{$}\NormalTok{command <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"& }\CharTok{\textbackslash{}\textbackslash{}}\StringTok{multicolumn\{1\}\{c\}\{Class\} & }\CharTok{\textbackslash{}\textbackslash{}}\StringTok{multicolumn\{1\}\{c\}\{Order\} & }
-\StringTok{                      }\CharTok{\textbackslash{}\textbackslash{}}\StringTok{multicolumn\{2\}\{c\}\{DNA\} & }\CharTok{\textbackslash{}\textbackslash{}}\StringTok{multicolumn\{2\}\{c\}\{RNA\} }\CharTok{\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n}\StringTok{"}\NormalTok{, }
-                      \StringTok{"& &  & min & max & min & max }\CharTok{\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}\textbackslash{}n}\StringTok{"}\NormalTok{)}
-\NormalTok{core.soil.tab <-}\StringTok{ }\KeywordTok{xtable}\NormalTok{(core.soil)}
-\KeywordTok{align}\NormalTok{(core.soil.tab) <-}\StringTok{ "crrrrrrr"}
-\KeywordTok{print}\NormalTok{(core.soil.tab, }\DataTypeTok{add.to.row =}\NormalTok{ addtorow, }\DataTypeTok{include.colnames =} \OtherTok{FALSE}\NormalTok{, }
-      \DataTypeTok{type=} \StringTok{"latex"}\NormalTok{, }\DataTypeTok{file=}\StringTok{"tables/table1.tex"}\NormalTok{)}
-\KeywordTok{print}\NormalTok{(core.soil.tab, }\DataTypeTok{add.to.row =}\NormalTok{ addtorow, }\DataTypeTok{include.colnames =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{comment =} \OtherTok{FALSE}\NormalTok{)}
-
-\NormalTok{core.water.tab <-}\StringTok{ }\KeywordTok{xtable}\NormalTok{(core.water)}
-\KeywordTok{align}\NormalTok{(core.water.tab) <-}\StringTok{ "crrrrrr"}
-\KeywordTok{print}\NormalTok{(core.water.tab, }\DataTypeTok{add.to.row =}\NormalTok{ addtorow, }\DataTypeTok{include.colnames =} \OtherTok{FALSE}\NormalTok{, }
-      \DataTypeTok{type=} \StringTok{"latex"}\NormalTok{, }\DataTypeTok{file=}\StringTok{"tables/table2.tex"}\NormalTok{)}
-\KeywordTok{print}\NormalTok{(core.water.tab, }\DataTypeTok{add.to.row =}\NormalTok{ addtorow, }\DataTypeTok{include.colnames =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{comment =} \OtherTok{FALSE}\NormalTok{)}
+\NormalTok{env.ts.data <-}\StringTok{ }\KeywordTok{read.table}\NormalTok{(}\StringTok{"data/ul-seedbank.env.txt"}\NormalTok{, }\DataTypeTok{sep=}\StringTok{"}\CharTok{\textbackslash{}t}\StringTok{"}\NormalTok{, }\DataTypeTok{header=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{env.ts.data}\OperatorTok{$}\NormalTok{date <-}\StringTok{ }\KeywordTok{as.Date}\NormalTok{(}\KeywordTok{parse_date_time}\NormalTok{(env.ts.data}\OperatorTok{$}\NormalTok{date, }\StringTok{"m d y"}\NormalTok{))}
+\NormalTok{env.ts.data}\OperatorTok{$}\NormalTok{doc[}\KeywordTok{which}\NormalTok{(env.ts.data}\OperatorTok{$}\NormalTok{doc }\OperatorTok{==}\StringTok{ "**"}\NormalTok{)] <-}\StringTok{ }\OtherTok{NA}
+\NormalTok{env.ts.data}\OperatorTok{$}\NormalTok{doc <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(env.ts.data}\OperatorTok{$}\NormalTok{doc)}
+\KeywordTok{summary}\NormalTok{(env.ts.data)}
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{Comparisons of relabunds}\label{comparisons-of-relabunds}
-
-Now, lets see which taxa increase or decrease substantially along the
-gradient. I calculated the fold change in relative abundance of all
-these taxa along the gradient relative to their max abundance in soils.
-Thus, the OTUs that are most abundant near the soils will have a
-declining slope toward the dam. The OTUs that are perhaps seeded from
-the soils into the lake will have an increasing slope toward the dam.
+\begin{verbatim}
+##    sample.id           date                 temp            spc        
+##  Min.   :  1.00   Min.   :2013-04-19   Min.   : 2.21   Min.   :0.3300  
+##  1st Qu.: 31.75   1st Qu.:2013-11-20   1st Qu.: 5.50   1st Qu.:0.4600  
+##  Median : 62.50   Median :2014-06-23   Median :17.73   Median :0.5320  
+##  Mean   : 62.50   Mean   :2014-06-24   Mean   :16.18   Mean   :0.5172  
+##  3rd Qu.: 93.25   3rd Qu.:2015-01-25   3rd Qu.:25.05   3rd Qu.:0.5660  
+##  Max.   :124.00   Max.   :2015-09-14   Max.   :29.77   Max.   :0.6700  
+##                                        NA's   :2       NA's   :2       
+##      oxygen          salinity          secchi            ph        
+##  Min.   : 1.870   Min.   :0.1500   Min.   :0.200   Min.   : 6.890  
+##  1st Qu.: 5.237   1st Qu.:0.2200   1st Qu.:1.200   1st Qu.: 7.920  
+##  Median : 8.355   Median :0.2550   Median :1.600   Median : 8.415  
+##  Mean   : 8.961   Mean   :0.2487   Mean   :1.668   Mean   : 8.567  
+##  3rd Qu.:10.178   3rd Qu.:0.2700   3rd Qu.:2.200   3rd Qu.: 9.123  
+##  Max.   :22.240   Max.   :0.3200   Max.   :3.600   Max.   :10.860  
+##  NA's   :2        NA's   :2        NA's   :1       NA's   :2       
+##       chla              tp                tn              doc        
+##  Min.   :  0.92   Min.   :   8.26   Min.   : 0.407   Min.   :  2.00  
+##  1st Qu.: 12.63   1st Qu.:  26.30   1st Qu.: 0.882   1st Qu.: 32.25  
+##  Median : 37.67   Median :  34.85   Median : 1.210   Median : 61.50  
+##  Mean   : 79.25   Mean   :  84.25   Mean   : 1.889   Mean   : 61.57  
+##  3rd Qu.:121.31   3rd Qu.:  47.95   3rd Qu.: 1.490   3rd Qu.: 90.75  
+##  Max.   :523.56   Max.   :3200.00   Max.   :42.600   Max.   :121.00  
+##  NA's   :2        NA's   :2         NA's   :3        NA's   :2       
+##       orp             air.temp     
+##  Min.   :-41.800   Min.   :-11.60  
+##  1st Qu.:  9.325   1st Qu.:  7.00  
+##  Median : 21.700   Median : 18.50  
+##  Mean   : 50.507   Mean   : 15.57  
+##  3rd Qu.:104.975   3rd Qu.: 24.00  
+##  Max.   :225.200   Max.   : 32.00  
+##  NA's   :68        NA's   :2
+\end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{high.activity.soil.core <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(core.soil.taxa.DNA.REL.bounds) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(RNA.max }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(RNA.max)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
-\NormalTok{high.activity.water.core <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(core.water.taxa.DNA.REL.bounds) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(RNA.max }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(RNA.max)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
+\NormalTok{UL.ts.design <-}\StringTok{ }\KeywordTok{left_join}\NormalTok{(UL.ts.design, env.ts.data[,}\KeywordTok{c}\NormalTok{(}\StringTok{"sample.id"}\NormalTok{, }\StringTok{"date"}\NormalTok{)])}
+\NormalTok{env.ts.data <-}\StringTok{ }\NormalTok{env.ts.data[}\OperatorTok{-}\KeywordTok{which}\NormalTok{(}\OperatorTok{!}\NormalTok{(env.ts.data}\OperatorTok{$}\NormalTok{date }\OperatorTok{%in%}\StringTok{ }\NormalTok{UL.ts.design}\OperatorTok{$}\NormalTok{date)),]}
 
-\NormalTok{mean.soil.abunds.soil.core <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{), high.activity.soil.core}\OperatorTok{$}\NormalTok{OTU] }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\NormalTok{colMeans }\OperatorTok{%>%}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{mean_soil_relabund =}\NormalTok{ .) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(mean_soil_relabund))}
-\NormalTok{max.soil.abunds.soil.core <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{), high.activity.soil.core}\OperatorTok{$}\NormalTok{OTU] }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{apply}\NormalTok{(}\DataTypeTok{X =}\NormalTok{ ., }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, max) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{max_soil_relabund =}\NormalTok{ .) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(max_soil_relabund))}
-
-\NormalTok{mean.soil.abunds.water.core <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{), high.activity.water.core}\OperatorTok{$}\NormalTok{OTU] }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\NormalTok{colMeans }\OperatorTok{%>%}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{mean_soil_relabund =}\NormalTok{ .) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(mean_soil_relabund))}
-\NormalTok{max.soil.abunds.water.core <-}\StringTok{ }\NormalTok{OTUsREL[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{), high.activity.water.core}\OperatorTok{$}\NormalTok{OTU] }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{apply}\NormalTok{(}\DataTypeTok{X =}\NormalTok{ ., }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, max) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{max_soil_relabund =}\NormalTok{ .) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(max_soil_relabund))}
-
-
-\NormalTok{soil.vs.lake.abunds <-}\StringTok{ }\NormalTok{high.activity.soil.core }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(mean.soil.abunds.soil.core) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(max.soil.abunds.soil.core) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{soil_is_source =} \KeywordTok{ifelse}\NormalTok{(max_soil_relabund }\OperatorTok{>}\StringTok{ }\FloatTok{1e-3} \OperatorTok{&}\StringTok{ }\NormalTok{RNA.max }\OperatorTok{>}\StringTok{ }\FloatTok{1e-3}\NormalTok{, T, F)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Taxon =} \KeywordTok{ifelse}\NormalTok{(Genus }\OperatorTok{==}\StringTok{ "unclassified"}\NormalTok{, }\KeywordTok{paste}\NormalTok{(Family, }\StringTok{"sp."}\NormalTok{), Genus))}
-
-\NormalTok{combined.relabunds <-}\StringTok{ }\NormalTok{max.soil.abunds.soil.core }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(}\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(in.lake.core.from.soils.REL)), }\StringTok{"OTU"}\NormalTok{))}
-\KeywordTok{rownames}\NormalTok{(combined.relabunds) <-}\StringTok{ }\NormalTok{combined.relabunds}\OperatorTok{$}\NormalTok{OTU}
-\NormalTok{combined.relabunds <-}\StringTok{ }\NormalTok{combined.relabunds[,}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
-
-\NormalTok{otus.fold.change <-}\StringTok{ }\KeywordTok{na.omit}\NormalTok{(combined.relabunds }\OperatorTok{/}\StringTok{ }\NormalTok{combined.relabunds}\OperatorTok{$}\NormalTok{max_soil_relabund) }\CommentTok{# Calculate fold changes}
-
-\NormalTok{fold_change_summary <-}\StringTok{ }\NormalTok{otus.fold.change }\OperatorTok{%>%}\StringTok{ }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{max_soil_relabund) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{gather}\NormalTok{(}\StringTok{"sample"}\NormalTok{, }\StringTok{"fold_change"}\NormalTok{, }\OperatorTok{-}\NormalTok{OTU) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{select}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design.dna, }\StringTok{"sample"}\NormalTok{), }\OperatorTok{-}\NormalTok{station, }\OperatorTok{-}\NormalTok{molecule, }\OperatorTok{-}\NormalTok{type)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{group_by}\NormalTok{(OTU) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{max_change =} \KeywordTok{max}\NormalTok{(fold_change), }\DataTypeTok{min_change =} \KeywordTok{min}\NormalTok{(fold_change))}
-
-\NormalTok{otus.fold.change }\OperatorTok{%>%}\StringTok{ }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{max_soil_relabund) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{gather}\NormalTok{(}\StringTok{"sample"}\NormalTok{, }\StringTok{"fold_change"}\NormalTok{, }\OperatorTok{-}\NormalTok{OTU) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{select}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design.dna, }\StringTok{"sample"}\NormalTok{), }\OperatorTok{-}\NormalTok{station, }\OperatorTok{-}\NormalTok{molecule, }\OperatorTok{-}\NormalTok{type)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ fold_change, }\DataTypeTok{color =}\NormalTok{ OTU)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{yintercept =} \DecValTok{1}\NormalTok{), }\DataTypeTok{color =} \StringTok{"gray50"}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\DataTypeTok{size =} \DecValTok{2}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.05}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{comma) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{long =} \KeywordTok{unit}\NormalTok{(.}\DecValTok{1}\NormalTok{, }\StringTok{"in"}\NormalTok{), }\DataTypeTok{sides =} \StringTok{"l"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir Transect (m)"}\NormalTok{, }\DataTypeTok{y =} \StringTok{"Fold-change in abundance"}\NormalTok{)}
-
-\CommentTok{# otus.fold.change %>% rownames_to_column("OTU") %>% }
-\CommentTok{#   select(-max_soil_relabund) %>% }
-\CommentTok{#   gather("sample", "fold_change", -OTU) %>% }
-\CommentTok{#   left_join(select(rownames_to_column(design.dna, "sample"), -station, -molecule, -type))}
-
-\NormalTok{foldchanges <-}\StringTok{ }\KeywordTok{t}\NormalTok{(otus.fold.change)[}\OperatorTok{-}\DecValTok{1}\NormalTok{,]}
-\NormalTok{foldchangelms <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(foldchanges, }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, }
-    \DataTypeTok{FUN =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(x }\OperatorTok{~}\StringTok{ }\NormalTok{design.dna}\OperatorTok{$}\NormalTok{distance))}\OperatorTok{$}\NormalTok{coefficients[}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{8}\NormalTok{)])}
-\KeywordTok{rownames}\NormalTok{(foldchangelms) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"intercept"}\NormalTok{, }\StringTok{"slope"}\NormalTok{, }\StringTok{"pval"}\NormalTok{)}
-
-\NormalTok{soil.core.decresing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(foldchangelms)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{( slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{intercept, }\OperatorTok{-}\NormalTok{slope, }\OperatorTok{-}\NormalTok{pval, }\KeywordTok{everything}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(slope))}
-\NormalTok{soil.core.increasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(foldchangelms)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{( slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{intercept, }\OperatorTok{-}\NormalTok{slope, }\OperatorTok{-}\NormalTok{pval, }\KeywordTok{everything}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{arrange}\NormalTok{((slope))}
-  
-\NormalTok{soil.decrease.tab <-}\StringTok{ }\NormalTok{soil.core.decresing }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{OTU, }\OperatorTok{-}\NormalTok{Domain) }\OperatorTok{%>%}\StringTok{  }\KeywordTok{flextable}\NormalTok{()}
-\NormalTok{soil.increase.tab <-}\StringTok{ }\NormalTok{soil.core.increasing }\OperatorTok{%>%}\StringTok{ }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{OTU, }\OperatorTok{-}\NormalTok{Domain) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{flextable}\NormalTok{()}
-
-\KeywordTok{read_docx}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_end_section_continuous}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_par}\NormalTok{(}\StringTok{"Increasing away from stream inlet"}\NormalTok{, }\DataTypeTok{style =} \StringTok{"heading 2"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_flextable}\NormalTok{(soil.increase.tab) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_par}\NormalTok{(}\StringTok{"Decreasing away from stream inlet"}\NormalTok{, }\DataTypeTok{style =} \StringTok{"heading 2"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_flextable}\NormalTok{(soil.decrease.tab) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_end_section_landscape}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{print}\NormalTok{(}\DataTypeTok{target =} \StringTok{"tables/soil-core-change-tables.docx"}\NormalTok{)}
+\NormalTok{OTUs.in.core <-}\StringTok{ }\NormalTok{UL.ts.OTUs.RNA[, }\KeywordTok{which}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(UL.ts.OTUs) }\OperatorTok{%in%}\StringTok{ }\NormalTok{df.plot}\OperatorTok{$}\NormalTok{OTU)]}
+\KeywordTok{cbind.data.frame}\NormalTok{(UL.ts.design[}\KeywordTok{which}\NormalTok{(UL.ts.design}\OperatorTok{$}\NormalTok{sample.type }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{),], OTUs.in.core) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{as_tibble}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(}\OperatorTok{-}\NormalTok{sample.name, }\OperatorTok{-}\NormalTok{sample.type, }\OperatorTok{-}\NormalTok{sample.id, }\OperatorTok{-}\NormalTok{date, }\DataTypeTok{key =}\NormalTok{ OTU, }\DataTypeTok{value =}\NormalTok{ rel_abund) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{soils =} \KeywordTok{ifelse}\NormalTok{(OTU }\OperatorTok{%in%}\StringTok{ }\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(df2}\OperatorTok{$}\NormalTok{OTU, df3}\OperatorTok{$}\NormalTok{OTU)), }
+                        \StringTok{"Present in soils"}\NormalTok{, }\StringTok{"Absent from soils"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{change =} \KeywordTok{ifelse}\NormalTok{(OTU }\OperatorTok{%in%}\StringTok{ }\KeywordTok{unique}\NormalTok{(}\KeywordTok{c}\NormalTok{(df3}\OperatorTok{$}\NormalTok{OTU, df4}\OperatorTok{$}\NormalTok{OTU)), }
+                        \StringTok{"Decreasing"}\NormalTok{, }\StringTok{"Increasing"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{rel_abund =} \KeywordTok{ifelse}\NormalTok{(rel_abund }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\FloatTok{1e-6}\NormalTok{, rel_abund)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ date, }\DataTypeTok{y =}\NormalTok{ rel_abund, }\DataTypeTok{group =}\NormalTok{ OTU)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =}\NormalTok{ .}\DecValTok{1}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"smooth"}\NormalTok{, }\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{color =} \StringTok{"blue"}\NormalTok{,}
+            \DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\DataTypeTok{span =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{xintercept =} \KeywordTok{as_date}\NormalTok{(}\StringTok{"2013-07-15"}\NormalTok{))) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_date}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\KeywordTok{date_format}\NormalTok{(}\DataTypeTok{format =} \StringTok{"%b %y"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(soils }\OperatorTok{~}\StringTok{ }\NormalTok{change) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Relative abundance"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{Word Table}\label{word-table}
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/time_series-1} \end{center}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{soil.tab <-}\StringTok{ }\NormalTok{core.soil }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(RNA.max)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{flextable}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{autofit}\NormalTok{()}
-\NormalTok{water.tab <-}\StringTok{ }\NormalTok{core.water }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(RNA.max)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{flextable}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{autofit}\NormalTok{()}
-
-\KeywordTok{read_docx}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_par}\NormalTok{(}\StringTok{"Table S1"}\NormalTok{, }\DataTypeTok{style =} \StringTok{"heading 1"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_end_section_continuous}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_par}\NormalTok{(}\StringTok{"Core Reservoir Microbiome (present in soils)"}\NormalTok{, }\DataTypeTok{style =} \StringTok{"heading 2"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_flextable}\NormalTok{(soil.tab) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_par}\NormalTok{(}\StringTok{"Core Reservoir Microbiome (absent from soils)"}\NormalTok{, }\DataTypeTok{style =} \StringTok{"heading 2"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_add_flextable}\NormalTok{(water.tab) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{body_end_section_landscape}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{print}\NormalTok{(}\DataTypeTok{target =} \StringTok{"tables/core_tables.docx"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\subsection{Soil vs.~Lake Comparisons}\label{soil-vs.lake-comparisons}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{soil.vs.lake.abunds }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Genus =} \KeywordTok{str_replace}\NormalTok{(Genus, }\StringTok{"_unclassified"}\NormalTok{, }\StringTok{" sp."}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(max_soil_relabund }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ max_soil_relabund, }\DataTypeTok{y =}\NormalTok{ RNA.max)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{xintercept =} \FloatTok{1e-3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.1}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \FloatTok{1e-3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.1}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ F) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_x_log10}\NormalTok{(}\DataTypeTok{lim =} \KeywordTok{c}\NormalTok{(}\FloatTok{1e-6}\NormalTok{, }\FloatTok{1e-2}\NormalTok{)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{(}\DataTypeTok{lim =} \KeywordTok{c}\NormalTok{(}\FloatTok{1e-5}\NormalTok{, }\DecValTok{1}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{long =} \KeywordTok{unit}\NormalTok{(.}\DecValTok{1}\NormalTok{, }\StringTok{"in"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Max Soil Relative Abundance"}\NormalTok{, }\DataTypeTok{y =} \StringTok{"Max Lake RNA }\CharTok{\textbackslash{}n}\StringTok{Relative Abundance"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_text_repel}\NormalTok{(}\DataTypeTok{size =} \FloatTok{4.5}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{label =}\NormalTok{ Genus), }\DataTypeTok{force =} \FloatTok{1.5}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.9}\NormalTok{, }\DataTypeTok{segment.alpha =} \FloatTok{0.8}\NormalTok{, }\DataTypeTok{box.padding =}\NormalTok{ .}\DecValTok{75}\NormalTok{, }\DataTypeTok{max.iter =} \DecValTok{100000}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+Many of them do appear to track the seasons quite well, suggesting there
+could be a seasonality component to the role of terrestrial inputs into
+the reservoir.
 
 \section{Not-included}\label{not-included}
 
