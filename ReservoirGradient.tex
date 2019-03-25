@@ -125,7 +125,7 @@ Lennon}
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{11 March, 2019}
+    \date{25 March, 2019}
 
 \usepackage{array}
 \usepackage{graphics}
@@ -149,21 +149,6 @@ some other functions.
 \KeywordTok{library}\NormalTok{(}\StringTok{"viridis"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"cowplot"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"adespatial"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Warning: replacing previous import 'RNeXML::slot<-' by 'methods::slot<-'
-## when loading 'phylobase'
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: replacing previous import 'RNeXML::slot' by 'methods::slot' when
-## loading 'phylobase'
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(}\StringTok{"ggrepel"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"gganimate"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"maps"}\NormalTok{)}
@@ -617,7 +602,8 @@ distance:moleculeRNA\strut
 \StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ yposDNA }\OperatorTok{+}\StringTok{ }\DecValTok{300}\NormalTok{, }
            \DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \DecValTok{2750}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
-           \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,}\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(hill.water.mod.rich)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)), }\DataTypeTok{parse =}\NormalTok{ T)}
+           \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,}\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(hill.water.mod.rich)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)), }\DataTypeTok{parse =}\NormalTok{ T) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/alpha_fig.pdf"}\NormalTok{)}
 \NormalTok{alpha.fig}
 \end{Highlighting}
 \end{Shaded}
@@ -770,16 +756,17 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
              \DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{fill =}\NormalTok{ molecule, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ T) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ T, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{linetype =}\NormalTok{ molecule)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \KeywordTok{str_wrap}\NormalTok{(}\StringTok{"Similarity to soil community"}\NormalTok{, }\DataTypeTok{width =} \DecValTok{20}\NormalTok{), }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \KeywordTok{str_wrap}\NormalTok{(}\StringTok{"Percent similarity to soil community"}\NormalTok{, }\DataTypeTok{width =} \DecValTok{20}\NormalTok{), }
        \DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{,}\DecValTok{0}\NormalTok{)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, .}\DecValTok{25}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \KeywordTok{max}\NormalTok{(UL.sim}\OperatorTok{$}\NormalTok{bray.mean), }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
            \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,}\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(model.terr)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)), }\DataTypeTok{parse =}\NormalTok{ T) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ .}\DecValTok{065}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ .}\DecValTok{24}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{)}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ .}\DecValTok{24}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/similarity_fig.pdf"}\NormalTok{)}
 
 \NormalTok{similarity.plot}
 \end{Highlighting}
@@ -805,7 +792,8 @@ reservoir.
 \begin{Highlighting}[]
 \KeywordTok{plot_grid}\NormalTok{(alpha.fig }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{), similarity.plot, }
           \DataTypeTok{align =} \StringTok{"hv"}\NormalTok{,}
-          \DataTypeTok{labels =} \StringTok{"auto"}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)}
+          \DataTypeTok{labels =} \StringTok{"auto"}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/alpha_similarity_paneled.pdf"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -834,7 +822,7 @@ aquatic transect.
   \DataTypeTok{DNA_dim2 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim2,}
   \DataTypeTok{RNA_dim1 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim1,}
   \DataTypeTok{RNA_dim2 =} \KeywordTok{subset}\NormalTok{(water.pcvals, molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{)}\OperatorTok{$}\NormalTok{Dim2)}
-\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
+\NormalTok{pcoa.fig <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{scores}\NormalTok{(ul.pcoa)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"name"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"name"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(distance)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
@@ -850,13 +838,15 @@ aquatic transect.
                \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ DNA_dim1, }\DataTypeTok{y =}\NormalTok{ DNA_dim2,}
                    \DataTypeTok{xend =}\NormalTok{ RNA_dim1, }\DataTypeTok{yend =}\NormalTok{ RNA_dim2),}
                \DataTypeTok{alpha =} \DecValTok{0}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{coord_fixed}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\CommentTok{#coord_fixed(ratio = 1, xlim = c(-.4, .4)) +}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 1 ("}\NormalTok{, explainvars[}\DecValTok{1}\NormalTok{],}\StringTok{"%)"}\NormalTok{),}
        \DataTypeTok{y =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 2 ("}\NormalTok{, explainvars[}\DecValTok{2}\NormalTok{],}\StringTok{"%)"}\NormalTok{)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \OperatorTok{-}\NormalTok{.}\DecValTok{25}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{3}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{3}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{4}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Soils"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{)}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \OperatorTok{-}\NormalTok{.}\DecValTok{25}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{3}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =}\NormalTok{ .}\DecValTok{3}\NormalTok{, }\DataTypeTok{y =} \OperatorTok{-}\NormalTok{.}\DecValTok{4}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Soils"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/pcoa.pdf"}\NormalTok{)}
+\NormalTok{pcoa.fig}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1018,7 +1008,33 @@ lake. We calculate richness from the DNA-based samples.
 \NormalTok{terr.REL.log <-}\StringTok{ }\KeywordTok{log10}\NormalTok{(terr.REL)}
 
 \NormalTok{terr.mod1 <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(terr.rich.log }\OperatorTok{~}\StringTok{ }\NormalTok{design.dna}\OperatorTok{$}\NormalTok{distance)}
-\CommentTok{#summary(terr.mod1)}
+\KeywordTok{summary}\NormalTok{(terr.mod1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = terr.rich.log ~ design.dna$distance)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.21392 -0.10372 -0.02366  0.09693  0.26253 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)         2.1199393  0.0774515  27.371 3.21e-14 ***
+## design.dna$distance 0.0025505  0.0003258   7.828 1.12e-06 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.1562 on 15 degrees of freedom
+## Multiple R-squared:  0.8034, Adjusted R-squared:  0.7902 
+## F-statistic: 61.28 on 1 and 15 DF,  p-value: 1.124e-06
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \NormalTok{T1.R2 <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(terr.mod1)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)}
 \NormalTok{T1.int <-}\StringTok{ }\NormalTok{terr.mod1}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{1}\NormalTok{]}
 \NormalTok{T1.slp <-}\StringTok{ }\NormalTok{terr.mod1}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{]}
@@ -1089,18 +1105,32 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \NormalTok{transient.plot <-}\StringTok{ }\KeywordTok{tibble}\NormalTok{(}\DataTypeTok{transient_rich =}\NormalTok{ terr.rich, }\DataTypeTok{distance =}\NormalTok{ design.dna}\OperatorTok{$}\NormalTok{distance) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ transient_rich)) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"grey"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{,}\DecValTok{0}\NormalTok{)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{() }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{sides =} \StringTok{"l"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
        \DataTypeTok{y =} \StringTok{"Dormant soil taxa in reservoir"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{50}\NormalTok{, }\DataTypeTok{y =} \DecValTok{750}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{, }\DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,T1.R2), }\DataTypeTok{parse =}\NormalTok{ T) }
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \KeywordTok{max}\NormalTok{(terr.rich), }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
+           \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,T1.R2), }\DataTypeTok{parse =}\NormalTok{ T)  }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/transients.pdf"}\NormalTok{)}
 \NormalTok{transient.plot}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/plot_transient-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# plot_grid(alpha.fig, }
+\CommentTok{#           similarity.plot, }
+\CommentTok{#           pcoa.fig + , }
+\CommentTok{#           transient.plot,}
+\CommentTok{#           align = "hv", axis = "tlbr",}
+\CommentTok{#           labels = "auto", ncol = 2) +}
+\CommentTok{#   ggsave("figures/large_panel.pdf", width = 12, height = 8)}
+\end{Highlighting}
+\end{Shaded}
 
 \section{What is the fate of soil-derived taxa in the
 reservoir?}\label{what-is-the-fate-of-soil-derived-taxa-in-the-reservoir}
@@ -1121,7 +1151,7 @@ abundances?
 \NormalTok{in.lake.rna.pa <-}\StringTok{ }\NormalTok{(in.lake.rna }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{*}\StringTok{ }\DecValTok{1}
 
 \CommentTok{# define the 'core' taxa as otus present in 50% of samples}
-\NormalTok{in.lake.core <-}\StringTok{ }\NormalTok{w.dna[, }\KeywordTok{which}\NormalTok{((}\KeywordTok{colSums}\NormalTok{(in.lake.rna.pa) }\OperatorTok{/}\StringTok{ }\KeywordTok{nrow}\NormalTok{(in.lake.rna.pa)) }\OperatorTok{>=}\StringTok{ }\FloatTok{0.5}\NormalTok{)]}
+\NormalTok{in.lake.core <-}\StringTok{ }\NormalTok{w.dna[, }\KeywordTok{which}\NormalTok{((}\KeywordTok{colSums}\NormalTok{(in.lake.rna.pa) }\OperatorTok{/}\StringTok{ }\KeywordTok{nrow}\NormalTok{(in.lake.rna.pa)) }\OperatorTok{>=}\StringTok{ }\FloatTok{0.75}\NormalTok{)]}
 
 \CommentTok{# of the core, how many are also in the soil samples?}
 \NormalTok{in.lake.core.from.soils <-}\StringTok{ }\NormalTok{in.lake.core[, }\KeywordTok{intersect}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(in.lake.core), }\KeywordTok{colnames}\NormalTok{(in.soil))]}
@@ -1172,7 +1202,7 @@ them up into whether they were recovered in soils or not.
 \end{verbatim}
 
 \begin{verbatim}
-## Warning: Removed 149 rows containing non-finite values (stat_smooth).
+## Warning: Removed 59 rows containing non-finite values (stat_smooth).
 \end{verbatim}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/coreplot-1} \end{center}
@@ -1197,7 +1227,7 @@ from the soils) - aquatic taxa seeded by populations stored in the soils
 \CommentTok{# classify otus as significantly increasing or decreasing along reservoir}
 \NormalTok{soil.core.decreasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(soil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(pval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05} \OperatorTok{&}\StringTok{ }\NormalTok{slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
 \StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
 \end{Highlighting}
 \end{Shaded}
@@ -1211,7 +1241,7 @@ from the soils) - aquatic taxa seeded by populations stored in the soils
 \begin{Highlighting}[]
 \NormalTok{soil.core.increasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(soil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(pval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05} \OperatorTok{&}\StringTok{ }\NormalTok{slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
 \StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
 \end{Highlighting}
 \end{Shaded}
@@ -1228,7 +1258,7 @@ from the soils) - aquatic taxa seeded by populations stored in the soils
 \KeywordTok{rownames}\NormalTok{(nonsoil.core.mods) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"slope"}\NormalTok{, }\StringTok{"pval"}\NormalTok{)}
 \NormalTok{nonsoil.core.decreasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(nonsoil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(pval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05} \OperatorTok{&}\StringTok{ }\NormalTok{slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
 \StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
 \end{Highlighting}
 \end{Shaded}
@@ -1242,7 +1272,7 @@ from the soils) - aquatic taxa seeded by populations stored in the soils
 \begin{Highlighting}[]
 \NormalTok{nonsoil.core.increasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(nonsoil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(pval }\OperatorTok{<}\StringTok{ }\FloatTok{0.05} \OperatorTok{&}\StringTok{ }\NormalTok{slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
 \StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
 \end{Highlighting}
 \end{Shaded}
@@ -1292,11 +1322,11 @@ Phylum\strut
 \midrule
 \endhead
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00057\strut
+Otu00020\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-2.463e-05\strut
+4.933e-07\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.03269\strut
+0.9784\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
@@ -1313,13 +1343,35 @@ Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
 Firmicutes\strut
 \end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu01010\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+1.364e-08\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.8511\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu01055\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+6.268e-08\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.25\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
 
 \begin{longtable}[]{@{}ccc@{}}
 \caption{Table continues below}\tabularnewline
 \toprule
-\begin{minipage}[b]{0.28\columnwidth}\centering\strut
+\begin{minipage}[b]{0.27\columnwidth}\centering\strut
 Class\strut
 \end{minipage} & \begin{minipage}[b]{0.23\columnwidth}\centering\strut
 Order\strut
@@ -1329,7 +1381,7 @@ Family\strut
 \midrule
 \endfirsthead
 \toprule
-\begin{minipage}[b]{0.28\columnwidth}\centering\strut
+\begin{minipage}[b]{0.27\columnwidth}\centering\strut
 Class\strut
 \end{minipage} & \begin{minipage}[b]{0.23\columnwidth}\centering\strut
 Order\strut
@@ -1338,35 +1390,55 @@ Family\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
-\begin{minipage}[t]{0.28\columnwidth}\centering\strut
-Gammaproteobacteria\strut
+\begin{minipage}[t]{0.27\columnwidth}\centering\strut
+Betaproteobacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
-Methylococcales\strut
+Burkholderiales\strut
 \end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
-Methylococcaceae\strut
+Alcaligenaceae\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+\begin{minipage}[t]{0.27\columnwidth}\centering\strut
 Bacilli\strut
 \end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
 Bacillales\strut
 \end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
 Bacillaceae\_1\strut
 \end{minipage}\tabularnewline
+\begin{minipage}[t]{0.27\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
+Actinomycetales\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
+Dermabacteraceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.27\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
+Actinomycetales\strut
+\end{minipage} & \begin{minipage}[t]{0.23\columnwidth}\centering\strut
+Dietziaceae\strut
+\end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
 
 \begin{longtable}[]{@{}c@{}}
 \toprule
-\begin{minipage}[b]{0.42\columnwidth}\centering\strut
+\begin{minipage}[b]{0.39\columnwidth}\centering\strut
 Genus\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
-\begin{minipage}[t]{0.42\columnwidth}\centering\strut
-Methylococcaceae\_unclassified\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Alcaligenaceae\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.42\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Bacillus\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Brachybacterium\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Dietzia\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -1420,26 +1492,26 @@ Bacteria\strut
 Actinobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00016\strut
+Otu00007\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--5.806e-05\strut
+-3.822e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.0001992\strut
+0.704\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Actinobacteria\strut
+Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00017\strut
+Otu00023\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--3.298e-05\strut
+-3.269e-07\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-4.237e-05\strut
+0.7409\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Actinobacteria\strut
+Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00025\strut
@@ -1453,37 +1525,15 @@ Bacteria\strut
 Actinobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00029\strut
+Otu00032\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--3.389e-05\strut
+-1.799e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.001212\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Actinobacteria\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00031\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--6.068e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.000148\strut
+0.2422\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
 Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00034\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--9.904e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-2.635e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00038\strut
@@ -1508,105 +1558,6 @@ Bacteria\strut
 Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00050\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--1.948e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.002039\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00055\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--1.084e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.006634\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00058\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--1.238e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.01813\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Armatimonadetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00071\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--5.253e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-8.694e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Planctomycetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00075\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--2.21e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.002713\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00080\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--2.261e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.02962\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00091\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--1.433e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-8.002e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00099\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--2.171e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.01177\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00113\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--1.395e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.0002851\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00118\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
 -7.165e-06\strut
@@ -1627,28 +1578,6 @@ Otu00156\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
 Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00168\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--1.2e-05\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.000938\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00178\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--2.446e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.02077\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.27\columnwidth}\centering\strut
-Proteobacteria\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -1677,9 +1606,14 @@ Actinobacteria\strut
 Actinomycetales\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Actinobacteria\strut
+Betaproteobacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Actinomycetales\strut
+Burkholderiales\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.38\columnwidth}\centering\strut
+Gammaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+Pseudomonadales\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.38\columnwidth}\centering\strut
 Actinobacteria\strut
@@ -1687,24 +1621,9 @@ Actinobacteria\strut
 Actinomycetales\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Actinobacteria\strut
+Bacteroidetes\_unclassified\strut
 \end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Actinomycetales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Actinobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Actinomycetales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Cytophagia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Cytophagales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Alphaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Sphingomonadales\strut
+Bacteroidetes\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.38\columnwidth}\centering\strut
 Actinobacteria\strut
@@ -1717,51 +1636,6 @@ Alphaproteobacteria\strut
 Rhodospirillales\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Sphingobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Sphingobacteriales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Flavobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Flavobacteriales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Armatimonadia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Armatimonadales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Planctomycetia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Planctomycetales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Flavobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Flavobacteriales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Sphingobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Sphingobacteriales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
 Actinobacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
 Actinobacteria\_unclassified\strut
@@ -1771,16 +1645,6 @@ Bacteria\_unclassified\strut
 \end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
 Bacteria\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Alphaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Rhodobacterales\strut
-\end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
 
@@ -1788,120 +1652,55 @@ Rhodobacterales\strut
 \toprule
 \begin{minipage}[b]{0.41\columnwidth}\centering\strut
 Family\strut
-\end{minipage} & \begin{minipage}[b]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.42\columnwidth}\centering\strut
 Genus\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+Burkholderiaceae\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
+Polynucleobacter\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+Moraxellaceae\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
+Acinetobacter\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
 Microbacteriaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
 Microbacteriaceae\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Actinomycetales\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Microbacteriaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Microbacteriaceae\_unclassified\strut
+Bacteroidetes\_unclassified\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
+Bacteroidetes\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Actinomycetales\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Cyclobacteriaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Algoriphagus\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Sphingomonadaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Sphingorhabdus\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
 Acetobacteraceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
 Roseomonas\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Chitinophagaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Chitinophagaceae\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Cryomorphaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Cryomorphaceae\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Armatimonadaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Armatimonas/Armatimonadetes\_gp1\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Planctomycetaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Planctomycetaceae\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Flavobacteriaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Flavobacterium\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Saprospiraceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Saprospiraceae\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
 Actinobacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
 Actinobacteria\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.41\columnwidth}\centering\strut
 Bacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.42\columnwidth}\centering\strut
 Bacteria\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Bacteroidetes\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Rhodobacteraceae\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
-Rhodobacteraceae\_unclassified\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -1924,7 +1723,7 @@ slope\strut
 pval\strut
 \end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\centering\strut
 Domain\strut
-\end{minipage} & \begin{minipage}[b]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.20\columnwidth}\centering\strut
 Phylum\strut
 \end{minipage}\tabularnewline
 \midrule
@@ -1938,11 +1737,33 @@ slope\strut
 pval\strut
 \end{minipage} & \begin{minipage}[b]{0.13\columnwidth}\centering\strut
 Domain\strut
-\end{minipage} & \begin{minipage}[b]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.20\columnwidth}\centering\strut
 Phylum\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00009\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+4.862e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.06326\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00012\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+7.397e-07\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.9069\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
+\end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00018\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
@@ -1951,19 +1772,85 @@ Otu00018\strut
 0.02295\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00026\strut
+Otu00022\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-1.513e-05\strut
+9.926e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.03508\strut
+0.5565\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Verrucomicrobia\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00028\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+2.89e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.06155\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Proteobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00030\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+1.849e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.07112\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00039\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+6.677e-06\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.3738\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00042\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+1.432e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.06336\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00059\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+5.62e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.05497\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00065\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+4.952e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.05262\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Bacteroidetes\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00077\strut
@@ -1973,7 +1860,7 @@ Otu00077\strut
 0.0459\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Bacteroidetes\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
@@ -1984,41 +1871,41 @@ Otu00081\strut
 0.04586\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00201\strut
+Otu00086\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-1.249e-05\strut
+1.075e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.03558\strut
+0.06061\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
-Acidobacteria\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00260\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-9.203e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.0455\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00816\strut
+Otu00095\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-2.175e-06\strut
+3.442e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.01383\strut
+0.05901\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\centering\strut
-Acidobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00545\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+2.144e-06\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+0.05592\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Actinobacteria\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -2028,9 +1915,9 @@ Acidobacteria\strut
 \toprule
 \begin{minipage}[b]{0.28\columnwidth}\centering\strut
 Class\strut
-\end{minipage} & \begin{minipage}[b]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.30\columnwidth}\centering\strut
 Order\strut
-\end{minipage} & \begin{minipage}[b]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.30\columnwidth}\centering\strut
 Family\strut
 \end{minipage}\tabularnewline
 \midrule
@@ -2038,61 +1925,117 @@ Family\strut
 \toprule
 \begin{minipage}[b]{0.28\columnwidth}\centering\strut
 Class\strut
-\end{minipage} & \begin{minipage}[b]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.30\columnwidth}\centering\strut
 Order\strut
-\end{minipage} & \begin{minipage}[b]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.30\columnwidth}\centering\strut
 Family\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
 Gammaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Pseudomonadales\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Pseudomonadaceae\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
 Betaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Burkholderiales\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Comamonadaceae\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Gammaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Pseudomonadales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Pseudomonadaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Opitutae\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Opitutae\_unclassified\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Opitutae\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Gammaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Pseudomonadales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Pseudomonadaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Actinomycetales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Micrococcaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Betaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Burkholderiales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Comamonadaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Betaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Burkholderiales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Burkholderiaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Actinobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Actinomycetales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Micrococcaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
+Sphingobacteriia\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Sphingobacteriales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Sphingobacteriaceae\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.28\columnwidth}\centering\strut
 Flavobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Flavobacteriales\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Flavobacteriaceae\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
 Betaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Burkholderiales\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
 Oxalobacteraceae\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
-Acidobacteria\_Gp6\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
-Gp6\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
-Gp6\_unclassified\strut
+Alphaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Rhizobiales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Bradyrhizobiaceae\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
-Gammaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
-Enterobacteriales\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
-Enterobacteriaceae\strut
+Betaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Burkholderiales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Comamonadaceae\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.28\columnwidth}\centering\strut
-Acidobacteria\_Gp6\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
-Gp6\strut
-\end{minipage} & \begin{minipage}[t]{0.25\columnwidth}\centering\strut
-Gp6\_unclassified\strut
+Actinobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Solirubrobacterales\strut
+\end{minipage} & \begin{minipage}[t]{0.30\columnwidth}\centering\strut
+Solirubrobacteraceae\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -2111,19 +2054,43 @@ Pseudomonas\strut
 Comamonadaceae\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Pseudomonas\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Opitutae\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Pseudomonas\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Micrococcus\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Comamonas\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Burkholderia\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Arthrobacter\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Pedobacter\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Flavobacterium\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Janthinobacterium\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.39\columnwidth}\centering\strut
-Gp6\_unclassified\strut
+Bradyrhizobium\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.39\columnwidth}\centering\strut
-Yersinia\strut
+Comamonadaceae\_unclassified\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.39\columnwidth}\centering\strut
-Gp6\_unclassified\strut
+Solirubrobacter\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -2210,17 +2177,6 @@ Bacteria\strut
 Bacteroidetes\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00006\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--8.526e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.04222\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
-Bacteroidetes\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00008\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
 -4.242e-05\strut
@@ -2230,6 +2186,28 @@ Otu00008\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Actinobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00010\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
+-4.197e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+0.5399\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Otu00011\strut
+\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
+-2.029e-05\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+0.5457\strut
+\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
+Bacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
+Proteobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Otu00014\strut
@@ -2254,26 +2232,15 @@ Bacteria\strut
 Actinobacteria\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00096\strut
+Otu00033\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--7.061e-06\strut
+-1.544e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.006714\strut
+0.437\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
 Proteobacteria\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Otu00190\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering\strut
--3.162e-06\strut
-\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.03246\strut
-\end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering\strut
-Bacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.20\columnwidth}\centering\strut
-Verrucomicrobia\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -2281,132 +2248,132 @@ Verrucomicrobia\strut
 \begin{longtable}[]{@{}cc@{}}
 \caption{Table continues below}\tabularnewline
 \toprule
-\begin{minipage}[b]{0.29\columnwidth}\centering\strut
+\begin{minipage}[b]{0.39\columnwidth}\centering\strut
 Class\strut
-\end{minipage} & \begin{minipage}[b]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.43\columnwidth}\centering\strut
 Order\strut
 \end{minipage}\tabularnewline
 \midrule
 \endfirsthead
 \toprule
-\begin{minipage}[b]{0.29\columnwidth}\centering\strut
+\begin{minipage}[b]{0.39\columnwidth}\centering\strut
 Class\strut
-\end{minipage} & \begin{minipage}[b]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.43\columnwidth}\centering\strut
 Order\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Betaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Burkholderiales\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Actinobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Actinomycetales\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Spartobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Spartobacteria\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Sphingobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Sphingobacteriales\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
-Sphingobacteriia\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Sphingobacteriales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Actinobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Actinomycetales\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Proteobacteria\_unclassified\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+Proteobacteria\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
+Betaproteobacteria\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+Betaproteobacteria\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Actinobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Actinomycetales\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Actinobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
 Actinobacteria\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
+\begin{minipage}[t]{0.39\columnwidth}\centering\strut
 Alphaproteobacteria\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Rhodobacterales\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.29\columnwidth}\centering\strut
-Verrucomicrobiae\strut
-\end{minipage} & \begin{minipage}[t]{0.38\columnwidth}\centering\strut
-Verrucomicrobiales\strut
+\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\centering\strut
+Rhizobiales\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
 
 \begin{longtable}[]{@{}cc@{}}
 \toprule
-\begin{minipage}[b]{0.41\columnwidth}\centering\strut
+\begin{minipage}[b]{0.44\columnwidth}\centering\strut
 Family\strut
-\end{minipage} & \begin{minipage}[b]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[b]{0.44\columnwidth}\centering\strut
 Genus\strut
 \end{minipage}\tabularnewline
 \midrule
 \endhead
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Comamonadaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Comamonadaceae\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Spartobacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Spartobacteria\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Chitinophagaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Sediminibacterium\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Saprospiraceae\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Saprospiraceae\_unclassified\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
+Proteobacteria\_unclassified\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
+Proteobacteria\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
+Betaproteobacteria\_unclassified\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
+Betaproteobacteria\_unclassified\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinomycetales\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinobacteria\_unclassified\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
 Actinobacteria\_unclassified\strut
 \end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Rhodobacteraceae\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Rhodobacter\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Verrucomicrobiaceae\strut
-\end{minipage} & \begin{minipage}[t]{0.41\columnwidth}\centering\strut
-Luteolibacter\strut
+\begin{minipage}[t]{0.44\columnwidth}\centering\strut
+Rhizobiales\_unclassified\strut
+\end{minipage} & \begin{minipage}[t]{0.44\columnwidth}\centering\strut
+Rhizobiales\_unclassified\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -2544,32 +2511,60 @@ Luteolibacter\strut
 
 \NormalTok{df.plot <-}\StringTok{ }\KeywordTok{as_tibble}\NormalTok{(}\KeywordTok{rbind.data.frame}\NormalTok{(df1, df2, df3, df4)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{)}
 
-\NormalTok{df.plot }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{rel_abund =} \KeywordTok{ifelse}\NormalTok{(rel_abund }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\FloatTok{1e-6}\NormalTok{, rel_abund)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\CommentTok{#filter(soils == "Present in soils") %>% }
+\NormalTok{taxon_fate.plot <-}\StringTok{ }\NormalTok{df.plot }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{rel_abund =} \KeywordTok{ifelse}\NormalTok{(rel_abund }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\FloatTok{1e-6}\NormalTok{, rel_abund)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(soils }\OperatorTok{==}\StringTok{ "Present in soils"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\CommentTok{#mutate(change = ifelse(change == "Increasing", }
 \StringTok{  }\CommentTok{#                       paste0("Increasing (n = ", n2,")"),}
 \StringTok{  }\CommentTok{#                       paste0("Decreasing (n = ", n3,")"))) %>% }
 \StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ rel_abund, }\DataTypeTok{group =}\NormalTok{ OTU)) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.15}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"smooth"}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.25}\NormalTok{, }\DataTypeTok{size =} \DecValTok{1}\NormalTok{,}
-            \DataTypeTok{color =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\DataTypeTok{span =} \DecValTok{1}\NormalTok{, }\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\CommentTok{#geom_jitter(alpha = 0.15) + }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"smooth"}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.15}\NormalTok{, }\DataTypeTok{size =} \DecValTok{1}\NormalTok{,}
+            \DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{span =}\NormalTok{ .}\DecValTok{7}\NormalTok{, }\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{, }\OperatorTok{-}\DecValTok{50}\NormalTok{)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{scientific) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{guides}\NormalTok{(}\DataTypeTok{color =} \KeywordTok{guide_legend}\NormalTok{(}\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\CommentTok{#theme(legend.position = "none") +}
+\StringTok{  }\CommentTok{#guides(color = guide_legend(ncol = 1)) +}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
-       \DataTypeTok{y =} \StringTok{"Relative abundance"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(soils }\OperatorTok{~}\StringTok{ }\NormalTok{change)}
-\end{Highlighting}
-\end{Shaded}
+       \DataTypeTok{y =} \StringTok{"Active relative abundance"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \OperatorTok{-}\DecValTok{25}\NormalTok{, }\DataTypeTok{y =} \FloatTok{1e-1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{angle =} \DecValTok{90}\NormalTok{,}
+           \DataTypeTok{label =} \StringTok{"Maintained"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \OperatorTok{-}\DecValTok{25}\NormalTok{, }\DataTypeTok{y =} \FloatTok{1e-5}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{, }\DataTypeTok{hjust =} \FloatTok{0.5}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{angle =} \DecValTok{90}\NormalTok{,}
+           \DataTypeTok{label =} \StringTok{"Decaying"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/taxa_origins.pdf"}\NormalTok{)}
 
-\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/sig_taxa-1} \end{center}
 
-\begin{Shaded}
-\begin{Highlighting}[]
 \CommentTok{# how much do the different core components contribute to total abundances}
 \NormalTok{in.lake.core.soil.REL <-}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(in.lake.core.from.soils) }\OperatorTok{/}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(w.dna)}
 \NormalTok{in.lake.core.water.REL <-}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(in.lake.core.not.soils) }\OperatorTok{/}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(w.dna)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot_grid}\NormalTok{(transient.plot }\OperatorTok{+}\StringTok{ }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{""}\NormalTok{),}
+\NormalTok{          taxon_fate.plot,}
+          \DataTypeTok{align =} \StringTok{"hv"}\NormalTok{, }\DataTypeTok{axis =} \StringTok{"rltb"}\NormalTok{,}
+          \DataTypeTok{labels =} \StringTok{"auto"}\NormalTok{,}
+          \DataTypeTok{ncol =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/fate_panel.pdf"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/fate_panel-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# soil.mods <- t(soil.core.mods) %>% as.data.frame()}
+\CommentTok{# soil.mods$habitat <- "Present in soils"}
+\CommentTok{# soil.mods <- soil.mods %>% rownames_to_column(var = "OTU")}
+\CommentTok{# nonsoil.mods <- t(nonsoil.core.mods) %>% as.data.frame()}
+\CommentTok{# nonsoil.mods$habitat <- "Absent from soils"}
+\CommentTok{# nonsoil.mods <- nonsoil.mods %>% rownames_to_column(var = "OTU")}
+\CommentTok{# rbind.data.frame(soil.mods, nonsoil.mods) %>% }
+\CommentTok{#   filter(pval < 0.05) %>% }
+\CommentTok{#   ggplot(aes(x = -slope, fill = habitat, color = habitat)) +}
+\CommentTok{#   geom_line(stat = "density", alpha = 0.5, adjust = .8) +}
+\CommentTok{#   geom_density(color = NA, adjust = .8, alpha = 0.2)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -2741,6 +2736,8 @@ the reservoir.
           \DataTypeTok{align =} \StringTok{"hv"}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{, }\DataTypeTok{labels =} \StringTok{"AUTO"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/metab_plot-1} \end{center}
 
 \subsection{Relation of ecosystem functions and community
 structure}\label{relation-of-ecosystem-functions-and-community-structure}

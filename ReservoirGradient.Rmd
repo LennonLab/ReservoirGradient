@@ -302,7 +302,8 @@ alpha.fig <- hill.estim %>% filter(type == "water", Diversity == "Species richne
   annotate("text", x = 375, y = yposDNA + 300, 
            label = "Total", size = 5) +
   annotate(geom = "text", x = 0, y = 2750, hjust = 1, vjust = 1, size = 5,
-           label = paste0("r^2== ",round(summary(hill.water.mod.rich)$r.squared, 2)), parse = T)
+           label = paste0("r^2== ",round(summary(hill.water.mod.rich)$r.squared, 2)), parse = T) +
+  ggsave("figures/alpha_fig.pdf")
 alpha.fig
 ```
 So, from the basis of these results, we can make the following conclusions. 
@@ -351,16 +352,17 @@ similarity.plot <- UL.sim %>%
              color = molecule, fill = molecule, shape = molecule)) +
   geom_point(alpha = 0.8, size = 3, show.legend = T) + 
   geom_smooth(method = "lm", show.legend = T, aes(linetype = molecule)) + 
-  labs(y = str_wrap("Similarity to soil community", width = 20), 
+  labs(y = str_wrap("Percent similarity to soil community", width = 20), 
        x = "Reservoir distance (m)") + 
   scale_color_manual(values = my.cols) + 
   scale_fill_manual(values = my.cols) +
   theme(legend.position = "none") +
   scale_x_reverse(limits = c(400,0)) + 
-  annotate(geom = "text", x = 0, .25, hjust = 1, vjust = 1, size = 5,
+  annotate(geom = "text", x = 0, y = max(UL.sim$bray.mean), hjust = 1, vjust = 1, size = 5,
            label = paste0("r^2== ",round(summary(model.terr)$r.squared, 2)), parse = T) +
   annotate("text", x = 375, y = .065, label = "Active", size = 5) +
-  annotate("text", x = 375, y = .24, label = "Total", size = 5)
+  annotate("text", x = 375, y = .24, label = "Total", size = 5) +
+  ggsave("figures/similarity_fig.pdf")
 
 similarity.plot
 ```
@@ -370,7 +372,8 @@ We find that our model captures most of the variation in community structure \((
 ```{r combined-plots, fig.asp=2*3/4}
 plot_grid(alpha.fig + labs(x = ""), similarity.plot, 
           align = "hv",
-          labels = "auto", ncol = 1)
+          labels = "auto", ncol = 1) +
+  ggsave("figures/alpha_similarity_paneled.pdf")
 ```
 
 
@@ -392,7 +395,7 @@ pc_dists <- tibble(
   DNA_dim2 = subset(water.pcvals, molecule == "DNA")$Dim2,
   RNA_dim1 = subset(water.pcvals, molecule == "RNA")$Dim1,
   RNA_dim2 = subset(water.pcvals, molecule == "RNA")$Dim2)
-data.frame(scores(ul.pcoa)) %>% 
+pcoa.fig <- data.frame(scores(ul.pcoa)) %>% 
   rownames_to_column("name") %>% 
   left_join(rownames_to_column(design, "name")) %>% 
   arrange(desc(distance)) %>% filter(type == "water") %>% 
@@ -408,13 +411,15 @@ data.frame(scores(ul.pcoa)) %>%
                aes(x = DNA_dim1, y = DNA_dim2,
                    xend = RNA_dim1, yend = RNA_dim2),
                alpha = 0) +
-  coord_fixed() +
+  #coord_fixed(ratio = 1, xlim = c(-.4, .4)) +
   labs(x = paste0("PCoA 1 (", explainvars[1],"%)"),
        y = paste0("PCoA 2 (", explainvars[2],"%)")) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = .2, y = 0, label = "Active", size = 6) +
-  annotate(geom = "text", x = -.25, y = -.3, label = "Total", size = 6) + 
-  annotate(geom = "text", x = .3, y = -.4, label = "Soils", size = 6)
+  annotate(geom = "text", x = .2, y = 0, label = "Active", size = 5) +
+  annotate(geom = "text", x = -.25, y = -.3, label = "Total", size = 5) + 
+  annotate(geom = "text", x = .3, y = -.4, label = "Soils", size = 5) +
+  ggsave("figures/pcoa.pdf")
+pcoa.fig
 ```
 
 ```{r ordination_animate, eval = FALSE, include=FALSE}
@@ -507,7 +512,7 @@ terr.rich.log <- log10(terr.rich)
 terr.REL.log <- log10(terr.REL)
 
 terr.mod1 <- lm(terr.rich.log ~ design.dna$distance)
-#summary(terr.mod1)
+summary(terr.mod1)
 T1.R2 <- round(summary(terr.mod1)$r.squared, 2)
 T1.int <- terr.mod1$coefficients[1]
 T1.slp <- terr.mod1$coefficients[2]
@@ -519,16 +524,27 @@ We find distance is a highly significant predictor of the richness of these soil
 transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$distance) %>% 
   ggplot(aes(x = distance, y = transient_rich)) + 
   geom_smooth(method = "lm", color = "black", fill = "grey") +
-  geom_point(alpha = 1, color = "black") + 
+  geom_point(size = 3, alpha = .8, color = "black") + 
   scale_x_reverse(limits = c(400,0)) +
   scale_y_log10() +
   annotation_logticks(sides = "l") +
   labs(x = "Reservoir distance (m)",
        y = "Dormant soil taxa in reservoir") +
-  annotate("text", x = 50, y = 750, size = 6, label = paste0("r^2== ",T1.R2), parse = T) 
+  annotate("text", x = 0, y = max(terr.rich), hjust = 1, vjust = 1, size = 5,
+           label = paste0("r^2== ",T1.R2), parse = T)  +
+  ggsave("figures/transients.pdf")
 transient.plot
 ```
 
+```{r large_panel, fig.width=11, fig.asp = 3/4}
+# plot_grid(alpha.fig, 
+#           similarity.plot, 
+#           pcoa.fig + , 
+#           transient.plot,
+#           align = "hv", axis = "tlbr",
+#           labels = "auto", ncol = 2) +
+#   ggsave("figures/large_panel.pdf", width = 12, height = 8)
+```
 
 # What is the fate of soil-derived taxa in the reservoir? 
 So, we observe that most soil-derived taxa appear to decay once they enter the reservoir. Do any soil-derived taxa persist in the active bacterial community of the reservoir and do they rise to high relative abundances?
@@ -544,7 +560,7 @@ in.lake.rna <- OTUs[which(design$molecule == "RNA" & design$type == "water"), ]
 in.lake.rna.pa <- (in.lake.rna > 0) * 1
 
 # define the 'core' taxa as otus present in 50% of samples
-in.lake.core <- w.dna[, which((colSums(in.lake.rna.pa) / nrow(in.lake.rna.pa)) >= 0.5)]
+in.lake.core <- w.dna[, which((colSums(in.lake.rna.pa) / nrow(in.lake.rna.pa)) >= 0.75)]
 
 # of the core, how many are also in the soil samples?
 in.lake.core.from.soils <- in.lake.core[, intersect(colnames(in.lake.core), colnames(in.soil))]
@@ -598,11 +614,11 @@ rownames(soil.core.mods) <- c("slope", "pval")
 # classify otus as significantly increasing or decreasing along reservoir
 soil.core.decreasing <- as.data.frame(t(soil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(pval < 0.05 & slope > 0) %>%   # rel abund decreases toward dam
+  filter(slope > 0) %>%   # rel abund decreases toward dam
   left_join(OTU.tax)
 soil.core.increasing <- as.data.frame(t(soil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(pval < 0.05 & slope < 0) %>%   # rel abund increases toward dam
+  filter(slope < 0) %>%   # rel abund increases toward dam
   left_join(OTU.tax)
 
 nonsoil.core.mods <- apply(in.lake.core.not.soils.REL, MARGIN = 2, 
@@ -610,11 +626,11 @@ nonsoil.core.mods <- apply(in.lake.core.not.soils.REL, MARGIN = 2,
 rownames(nonsoil.core.mods) <- c("slope", "pval")
 nonsoil.core.decreasing <- as.data.frame(t(nonsoil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(pval < 0.05 & slope > 0) %>%   # rel abund decreases toward dam
+  filter(slope > 0) %>%   # rel abund decreases toward dam
   left_join(OTU.tax)
 nonsoil.core.increasing <- as.data.frame(t(nonsoil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(pval < 0.05 & slope < 0) %>%   # rel abund increases toward dam
+  filter(slope < 0) %>%   # rel abund increases toward dam
   left_join(OTU.tax)
 ```
 
@@ -636,7 +652,7 @@ pander(soil.core.increasing, caption = "Core taxa found in soils that get more c
 ```
 
 
-```{r sig_taxa, fig.asp=1}
+```{r sig_taxa, fig.width=6, fig.asp=3/4}
 # p1 <- as.data.frame(OTUsREL[,nonsoil.core.increasing$OTU]) %>% 
 #   rownames_to_column("sampleID") %>% 
 #   left_join(rownames_to_column(design, "sampleID")) %>% 
@@ -728,28 +744,56 @@ n4 <- length(unique(df4$OTU))
 
 df.plot <- as_tibble(rbind.data.frame(df1, df2, df3, df4)) %>% filter(type == "water")
 
-df.plot %>% mutate(rel_abund = ifelse(rel_abund == 0, 1e-6, rel_abund)) %>% 
-  #filter(soils == "Present in soils") %>% 
+taxon_fate.plot <- df.plot %>% mutate(rel_abund = ifelse(rel_abund == 0, 1e-6, rel_abund)) %>% 
+  filter(soils == "Present in soils") %>% 
   #mutate(change = ifelse(change == "Increasing", 
   #                       paste0("Increasing (n = ", n2,")"),
   #                       paste0("Decreasing (n = ", n3,")"))) %>% 
   ggplot(aes(x = distance, y = rel_abund, group = OTU)) + 
-  geom_jitter(alpha = 0.15) + 
-  geom_line(stat = "smooth", alpha = 0.25, size = 1,
-            color = "black", method = "lm", span = 1, se = FALSE) +
-  scale_x_reverse() +
+  #geom_jitter(alpha = 0.15) + 
+  geom_line(stat = "smooth", alpha = 0.15, size = 1,
+            method = "loess", span = .7, se = FALSE) +
+  scale_x_reverse(limits = c(400, -50)) +
   scale_y_log10(labels = scales::scientific) +
-  theme(legend.position = "none") +
-  guides(color = guide_legend(ncol = 1)) +
+  #theme(legend.position = "none") +
+  #guides(color = guide_legend(ncol = 1)) +
   labs(x = "Reservoir distance (m)",
-       y = "Relative abundance") + 
-  facet_grid(soils ~ change)
+       y = "Active relative abundance") +
+  annotate("text", x = -25, y = 1e-1, size = 5, hjust = 1, vjust = 1, angle = 90,
+           label = "Maintained") +
+  annotate("text", x = -25, y = 1e-5, size = 5, hjust = 0.5, vjust = 1, angle = 90,
+           label = "Decaying") +
+  ggsave("figures/taxa_origins.pdf")
 
 
 # how much do the different core components contribute to total abundances
 in.lake.core.soil.REL <- rowSums(in.lake.core.from.soils) / rowSums(w.dna)
 in.lake.core.water.REL <- rowSums(in.lake.core.not.soils) / rowSums(w.dna)
 ```
+
+```{r fate_panel, fig.asp=2*3/4}
+plot_grid(transient.plot + labs(x = ""),
+          taxon_fate.plot,
+          align = "hv", axis = "rltb",
+          labels = "auto",
+          ncol = 1) +
+  ggsave("figures/fate_panel.pdf")
+```
+
+```{r}
+# soil.mods <- t(soil.core.mods) %>% as.data.frame()
+# soil.mods$habitat <- "Present in soils"
+# soil.mods <- soil.mods %>% rownames_to_column(var = "OTU")
+# nonsoil.mods <- t(nonsoil.core.mods) %>% as.data.frame()
+# nonsoil.mods$habitat <- "Absent from soils"
+# nonsoil.mods <- nonsoil.mods %>% rownames_to_column(var = "OTU")
+# rbind.data.frame(soil.mods, nonsoil.mods) %>% 
+#   filter(pval < 0.05) %>% 
+#   ggplot(aes(x = -slope, fill = habitat, color = habitat)) +
+#   geom_line(stat = "density", alpha = 0.5, adjust = .8) +
+#   geom_density(color = NA, adjust = .8, alpha = 0.2)
+```
+
 
 # Are the "persistent" reservoir taxa really representative? Look over time...
 ```{r time_series, fig.asp=1}
@@ -803,7 +847,7 @@ Many of them do appear to track the seasons quite well, suggesting there could b
 
 # Not-included
 ## Ecosystem functions
-```{r metabolism, results='hide', eval = FALSE}
+```{r metabolism, results='hide', eval = TRUE}
 metab <- read.table("data/res.grad.metab.txt", sep="\t", header=TRUE)
 colnames(metab) <- c("dist", "BP", "BR")
 BGE <- round((metab$BP/(metab$BP + metab$BR)),3)
@@ -859,7 +903,7 @@ BGE.plot <- ggplot(metab, aes(x = dist, y = BGE)) +
 ```
 
 
-```{r metab_plot, fig.asp=1/.618, eval = FALSE}
+```{r metab_plot, fig.asp=3*3/4, eval = TRUE}
 plot_grid(BP.plot + theme(axis.title.x = element_blank(), axis.text.x = element_blank(), 
                           plot.margin = unit(c(1, 1, -1, 0), "cm")), 
           BR.plot + theme(axis.title.x = element_blank(), axis.text.x = element_blank(),
