@@ -527,7 +527,7 @@ transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$dista
   geom_point(size = 3, alpha = .8, color = "black") + 
   scale_x_reverse(limits = c(400,0)) +
   scale_y_log10() +
-  annotation_logticks(sides = "l") +
+  annotation_logticks(sides = "l", size = 1) +
   labs(x = "Reservoir distance (m)",
        y = "Dormant soil taxa in reservoir") +
   annotate("text", x = 0, y = max(terr.rich), hjust = 1, vjust = 1, size = 5,
