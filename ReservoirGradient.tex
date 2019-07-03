@@ -107,7 +107,7 @@
 \usepackage{titling}
 
 % Create subtitle command for use in maketitle
-\newcommand{\subtitle}[1]{
+\providecommand{\subtitle}[1]{
   \posttitle{
     \begin{center}\large#1\end{center}
     }
@@ -125,7 +125,7 @@ Lennon}
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{26 March, 2019}
+    \date{30 May, 2019}
 
 \usepackage{array}
 \usepackage{graphics}
@@ -245,7 +245,7 @@ log-transforming the abundances and relativizing by site.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Remove OTUs with less than two occurences across all sites}
-\NormalTok{OTUs <-}\StringTok{ }\NormalTok{OTUs[, }\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs) }\OperatorTok{>=}\StringTok{ }\DecValTok{2}\NormalTok{)]}
+\CommentTok{#OTUs <- OTUs[, which(colSums(OTUs) >= 2)]}
 
 \CommentTok{# Sequencing Coverage}
 \NormalTok{coverage <-}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(OTUs)}
@@ -254,7 +254,8 @@ log-transforming the abundances and relativizing by site.
 \NormalTok{lows <-}\StringTok{ }\KeywordTok{which}\NormalTok{(coverage }\OperatorTok{<}\StringTok{ }\DecValTok{10000}\NormalTok{)}
 \NormalTok{OTUs <-}\StringTok{ }\NormalTok{OTUs[}\OperatorTok{-}\KeywordTok{which}\NormalTok{(coverage }\OperatorTok{<}\StringTok{ }\DecValTok{10000}\NormalTok{), ]}
 \NormalTok{design <-}\StringTok{ }\NormalTok{design[}\OperatorTok{-}\KeywordTok{which}\NormalTok{(coverage }\OperatorTok{<}\StringTok{ }\DecValTok{10000}\NormalTok{), ]}
-\CommentTok{# Remove OTUs with less than two occurences across all sites}
+\NormalTok{otus.for.inext <-}\StringTok{  }\KeywordTok{t}\NormalTok{(OTUs)}
+\CommentTok{# Remove OTUs with < 2 occurences across all sites}
 \NormalTok{OTUs <-}\StringTok{ }\NormalTok{OTUs[, }\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs) }\OperatorTok{>=}\StringTok{ }\DecValTok{2}\NormalTok{)]}
 \NormalTok{coverage <-}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(OTUs)}
 \KeywordTok{set.seed}\NormalTok{(}\DecValTok{47405}\NormalTok{)}
@@ -334,13 +335,145 @@ Chao et al. in the iNEXT package.
 \NormalTok{exp.shan <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(shan)}
 \NormalTok{alpha.div <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(design, S.obs, simpsE, shan, exp.shan)}
 
+\CommentTok{# define singleton estimator from Chiu and Chao 2016 PeerJ}
+\KeywordTok{source}\NormalTok{(}\StringTok{"bin/Chao_functions.R"}\NormalTok{)}
 
-\CommentTok{# # estimate asymptotic richness}
-\CommentTok{#divestim <- iNEXT(t(OTUs), datatype = "abundance", nboot = 999)}
-\CommentTok{#saveRDS(divestim, file = "intermediate-data/inext-output-999boots.rda")}
-\NormalTok{divestim <-}\StringTok{ }\KeywordTok{read_rds}\NormalTok{(}\StringTok{"intermediate-data/inext-output-999boots.rda"}\NormalTok{)}
-\NormalTok{divestim.df <-}\StringTok{ }\KeywordTok{fortify}\NormalTok{(divestim) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{habitat =} \KeywordTok{str_to_title}\NormalTok{(design[}\KeywordTok{as.character}\NormalTok{(site),}\StringTok{"type"}\NormalTok{]))}
+\CommentTok{# # estimate richness}
+\NormalTok{singleton.apply <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x)\{}
+  \KeywordTok{singleton.Est}\NormalTok{(x, }\StringTok{"abundance"}\NormalTok{)}\OperatorTok{$}\NormalTok{corrected.data}
+\NormalTok{\}}
+
+\NormalTok{otus.for.inext <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(otus.for.inext, }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, singleton.apply)}
+\CommentTok{# divestim <- estimateD(otus.for.inext, datatype = "abundance", }
+\CommentTok{#           base = "size", conf = 0.95)}
+\CommentTok{# divestim <- iNEXT(otus.for.inext, datatype = "abundance", }
+\CommentTok{#                   size =  min(coverage), nboot = 999)}
+\CommentTok{# divestim$iNextEst}
+\CommentTok{# saveRDS(divestim, file = "intermediate-data/inext-output.rda")}
+\NormalTok{divestim <-}\StringTok{ }\KeywordTok{read_rds}\NormalTok{(}\StringTok{"intermediate-data/inext-output.rda"}\NormalTok{)}
+\NormalTok{divestim}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         site     m       method order    SC       qD   qD.LCL   qD.UCL
+## 1   RGSoil01 37027 interpolated     0 0.955 3889.214 3867.259 3911.169
+## 2   RGSoil01 37027 interpolated     1 0.955  752.963  746.212  759.715
+## 3   RGSoil01 37027 interpolated     2 0.955  182.356  179.896  184.817
+## 4   RGSoil02 37027 interpolated     0 0.945 4392.817 4367.251 4418.382
+## 5   RGSoil02 37027 interpolated     1 0.945  666.077  660.260  671.895
+## 6   RGSoil02 37027 interpolated     2 0.945  134.658  132.742  136.574
+## 7   RGSoil03 37027 interpolated     0 0.950 4191.294 4161.602 4220.987
+## 8   RGSoil03 37027 interpolated     1 0.950  773.790  766.732  780.848
+## 9   RGSoil03 37027 interpolated     2 0.950  179.353  176.344  182.363
+## 10     RGD01 37027     observed     0 0.999  350.000  341.907  358.093
+## 11     RGD01 37027     observed     1 0.999   60.336   59.421   61.251
+## 12     RGD01 37027     observed     2 0.999   30.661   30.111   31.211
+## 13     RGc01 37027 interpolated     0 0.996  285.774  277.158  294.391
+## 14     RGc01 37027 interpolated     1 0.996   21.184   21.034   21.335
+## 15     RGc01 37027 interpolated     2 0.996    9.764    9.671    9.858
+## 16     RGD02 37027 interpolated     0 0.996  535.631  521.557  549.704
+## 17     RGD02 37027 interpolated     1 0.996   70.802   69.799   71.805
+## 18     RGD02 37027 interpolated     2 0.996   35.622   35.059   36.185
+## 19     RGc02 37027 interpolated     0 0.996  276.963  269.657  284.269
+## 20     RGc02 37027 interpolated     1 0.996   31.118   30.905   31.332
+## 21     RGc02 37027 interpolated     2 0.996   16.072   15.940   16.204
+## 22     RGD03 37027 interpolated     0 0.997  576.480  562.427  590.532
+## 23     RGD03 37027 interpolated     1 0.997   67.500   66.450   68.550
+## 24     RGD03 37027 interpolated     2 0.997   31.838   31.267   32.409
+## 25     RGc03 37027 interpolated     0 0.997  166.654  160.265  173.044
+## 26     RGc03 37027 interpolated     1 0.997    7.545    7.497    7.593
+## 27     RGc03 37027 interpolated     2 0.997    4.194    4.165    4.223
+## 28     RGD04 37027 interpolated     0 0.996  536.871  519.687  554.055
+## 29     RGD04 37027 interpolated     1 0.996   71.051   70.051   72.052
+## 30     RGD04 37027 interpolated     2 0.996   35.457   34.821   36.092
+## 31     RGc04 37027 interpolated     0 0.997  392.580  385.414  399.746
+## 32     RGc04 37027 interpolated     1 0.997    2.241    2.218    2.264
+## 33     RGc04 37027 interpolated     2 0.997    1.336    1.331    1.341
+## 34     RGc05 37027 interpolated     0 0.998  212.420  204.739  220.101
+## 35     RGc05 37027 interpolated     1 0.998    4.881    4.840    4.923
+## 36     RGc05 37027 interpolated     2 0.998    3.967    3.950    3.984
+## 37     RGD06 37027 interpolated     0 0.992  720.373  709.705  731.041
+## 38     RGD06 37027 interpolated     1 0.992   61.376   60.858   61.894
+## 39     RGD06 37027 interpolated     2 0.992   26.153   25.921   26.386
+## 40     RGD07 37027 interpolated     0 0.991 1016.407  994.401 1038.413
+## 41     RGD07 37027 interpolated     1 0.991   85.475   83.864   87.085
+## 42     RGD07 37027 interpolated     2 0.991   34.786   34.100   35.471
+## 43     RGc07 37027 interpolated     0 0.997  171.638  163.075  180.202
+## 44     RGc07 37027 interpolated     1 0.997    4.496    4.467    4.524
+## 45     RGc07 37027 interpolated     2 0.997    3.192    3.172    3.213
+## 46     RGD08 37027 interpolated     0 0.992  835.316  824.174  846.458
+## 47     RGD08 37027 interpolated     1 0.992   71.572   70.913   72.230
+## 48     RGD08 37027 interpolated     2 0.992   29.885   29.555   30.216
+## 49     RGc08 37027 interpolated     0 0.998  165.011  160.172  169.850
+## 50     RGc08 37027 interpolated     1 0.998   18.257   18.159   18.355
+## 51     RGc08 37027 interpolated     2 0.998   10.562   10.482   10.642
+## 52     RGD09 37027 interpolated     0 0.993  962.514  942.906  982.123
+## 53     RGD09 37027 interpolated     1 0.993  102.957  101.246  104.668
+## 54     RGD09 37027 interpolated     2 0.993   40.437   39.617   41.256
+## 55     RGc09 37027 interpolated     0 0.997  264.910  257.723  272.096
+## 56     RGc09 37027 interpolated     1 0.997    5.931    5.883    5.979
+## 57     RGc09 37027 interpolated     2 0.997    3.899    3.879    3.920
+## 58     RGD10 37027 interpolated     0 0.992  979.243  968.583  989.904
+## 59     RGD10 37027 interpolated     1 0.992  115.134  114.131  116.138
+## 60     RGD10 37027 interpolated     2 0.992   50.536   49.946   51.126
+## 61     RGc10 37027 interpolated     0 0.993  728.724  712.946  744.503
+## 62     RGc10 37027 interpolated     1 0.993   78.838   77.746   79.930
+## 63     RGc10 37027 interpolated     2 0.993   29.012   28.430   29.595
+## 64     RGD11 37027 interpolated     0 0.990 1423.107 1411.926 1434.289
+## 65     RGD11 37027 interpolated     1 0.990  161.982  160.650  163.315
+## 66     RGD11 37027 interpolated     2 0.990   65.095   64.432   65.759
+## 67     RGc11 37027 interpolated     0 0.996  307.585  299.254  315.916
+## 68     RGc11 37027 interpolated     1 0.996   36.292   36.060   36.524
+## 69     RGc11 37027 interpolated     2 0.996   22.636   22.483   22.788
+## 70     RGD12 37027 interpolated     0 0.991 1720.686 1709.731 1731.640
+## 71     RGD12 37027 interpolated     1 0.991  252.525  250.280  254.770
+## 72     RGD12 37027 interpolated     2 0.991   85.267   84.458   86.077
+## 73     RGc12 37027 interpolated     0 0.995  372.791  363.552  382.029
+## 74     RGc12 37027 interpolated     1 0.995   24.840   24.682   24.997
+## 75     RGc12 37027 interpolated     2 0.995   17.702   17.624   17.780
+## 76     RGD13 37027 interpolated     0 0.988  930.870  916.712  945.028
+## 77     RGD13 37027 interpolated     1 0.988   56.414   55.942   56.885
+## 78     RGD13 37027 interpolated     2 0.988   23.056   22.824   23.287
+## 79     RGc13 37027 interpolated     0 0.997  269.903  263.231  276.575
+## 80     RGc13 37027 interpolated     1 0.997   15.722   15.619   15.825
+## 81     RGc13 37027 interpolated     2 0.997   10.745   10.689   10.800
+## 82     RGD14 37027 interpolated     0 0.986 1034.420 1017.730 1051.109
+## 83     RGD14 37027 interpolated     1 0.986   73.078   72.401   73.755
+## 84     RGD14 37027 interpolated     2 0.986   31.228   30.863   31.592
+## 85     RGc14 37027 interpolated     0 0.996  274.400  266.768  282.033
+## 86     RGc14 37027 interpolated     1 0.996   24.518   24.418   24.619
+## 87     RGc14 37027 interpolated     2 0.996   18.355   18.270   18.441
+## 88     RGD15 37027 interpolated     0 0.987 1793.670 1777.615 1809.724
+## 89     RGD15 37027 interpolated     1 0.987  203.796  201.493  206.100
+## 90     RGD15 37027 interpolated     2 0.987   70.240   69.353   71.127
+## 91     RGc15 37027 interpolated     0 0.997  234.673  225.851  243.495
+## 92     RGc15 37027 interpolated     1 0.997   25.655   25.508   25.802
+## 93     RGc15 37027 interpolated     2 0.997   18.394   18.269   18.519
+## 94     RGD16 37027 interpolated     0 0.983 1539.874 1520.207 1559.540
+## 95     RGD16 37027 interpolated     1 0.983   39.704   39.088   40.320
+## 96     RGD16 37027 interpolated     2 0.983    9.644    9.523    9.765
+## 97     RGc16 37027 interpolated     0 0.998  122.606  116.878  128.335
+## 98     RGc16 37027 interpolated     1 0.998    2.358    2.345    2.371
+## 99     RGc16 37027 interpolated     2 0.998    1.747    1.740    1.755
+## 100    RGD17 37027 interpolated     0 0.993 1190.721 1176.273 1205.170
+## 101    RGD17 37027 interpolated     1 0.993  126.164  124.455  127.873
+## 102    RGD17 37027 interpolated     2 0.993   44.699   44.030   45.368
+## 103    RGc17 37027 interpolated     0 0.997  380.131  373.375  386.886
+## 104    RGc17 37027 interpolated     1 0.997   12.276   12.171   12.381
+## 105    RGc17 37027 interpolated     2 0.997    6.641    6.604    6.679
+## 106    RGD18 37027 interpolated     0 0.986 2304.240 2290.738 2317.742
+## 107    RGD18 37027 interpolated     1 0.986  296.102  292.933  299.270
+## 108    RGD18 37027 interpolated     2 0.986   76.031   75.068   76.993
+## 109    RGc18 37027 interpolated     0 0.996  220.000  212.572  227.429
+## 110    RGc18 37027 interpolated     1 0.996    4.727    4.704    4.750
+## 111    RGc18 37027 interpolated     2 0.996    3.665    3.654    3.676
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{divestim.df <-}\StringTok{ }\NormalTok{divestim }\OperatorTok{%>%}\StringTok{ }
+\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{habitat =} \KeywordTok{str_to_title}\NormalTok{(design[}\KeywordTok{as.character}\NormalTok{(site),}\StringTok{"type"}\NormalTok{]))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -349,44 +482,54 @@ samples relative to the lake samples.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{divestim.df }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ x, }\DataTypeTok{y =}\NormalTok{ y, }
-             \DataTypeTok{ymin =}\NormalTok{ y.lwr, }\DataTypeTok{ymax =}\NormalTok{ y.upr, }
-             \DataTypeTok{color =}\NormalTok{ habitat, }\DataTypeTok{fill =}\NormalTok{ habitat, }\DataTypeTok{group =}\NormalTok{ site)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_ribbon}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(divestim.df, method }\OperatorTok{==}\StringTok{ "extrapolated"}\NormalTok{), }\DataTypeTok{alpha =} \FloatTok{0.3}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{data=}\KeywordTok{subset}\NormalTok{(divestim.df, method }\OperatorTok{==}\StringTok{ "interpolated"}\NormalTok{), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{, }\DataTypeTok{linetype =} \StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{comma, }\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{90000}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Sample size"}\NormalTok{, }\DataTypeTok{y =} \StringTok{"Estimated richness"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\CommentTok{#theme(legend.position =  c(.88,.5)) +}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{label =} \StringTok{"Soil"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{, }\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{85000}\NormalTok{, }\DataTypeTok{y =} \DecValTok{5000}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{label =} \StringTok{"Water"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{6}\NormalTok{, }\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{85000}\NormalTok{, }\DataTypeTok{y =} \DecValTok{1500}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{scale_color_grey}\NormalTok{(}\DataTypeTok{end =}\NormalTok{ .}\DecValTok{7}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_fill_grey}\NormalTok{(}\DataTypeTok{end =}\NormalTok{ .}\DecValTok{7}\NormalTok{)}
+\CommentTok{# divestim.df %>% }
+\CommentTok{#   ggplot(aes(x = x, y = y, }
+\CommentTok{#              ymin = y.lwr, ymax = y.upr, }
+\CommentTok{#              color = habitat, fill = habitat, group = site)) +}
+\CommentTok{#   geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +}
+\CommentTok{#   geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +}
+\CommentTok{#   geom_line(alpha = 1, linetype = "dashed") +}
+\CommentTok{#   scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +}
+\CommentTok{#   labs(x = "Sample size", y = "Estimated richness") +}
+\CommentTok{#   theme(legend.position = "none") +}
+\CommentTok{#   #theme(legend.position =  c(.88,.5)) +}
+\CommentTok{#   annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) + }
+\CommentTok{#   annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) + }
+\CommentTok{#   scale_color_grey(end = .7) +}
+\CommentTok{#   scale_fill_grey(end = .7)}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/rare_extrap_plot-1} \end{center}
 
 Next, we'll extract the estimates for the Hill numbers at different
 levels of q, which differentially weight common versus rare species.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{hill.estim <-}\StringTok{ }\NormalTok{divestim}\OperatorTok{$}\NormalTok{AsyEst }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(Diversity }\OperatorTok{==}\StringTok{ "Species richness"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(alpha.div), }\DataTypeTok{by =} \KeywordTok{c}\NormalTok{(}\StringTok{"Observed"}\NormalTok{ =}\StringTok{ "S.obs"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{select}\NormalTok{(Site, rowname, station, molecule, type, distance) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{left_join}\NormalTok{(divestim}\OperatorTok{$}\NormalTok{AsyEst, }\DataTypeTok{by =} \StringTok{"Site"}\NormalTok{)}
+\CommentTok{# hill.estim <- divestim$AsyEst %>% filter(Diversity == "Species richness") %>% }
+\CommentTok{#   left_join(rownames_to_column(alpha.div), by = c("Observed" = "S.obs")) %>% }
+\CommentTok{#   select(Site, rowname, station, molecule, type, distance) %>% }
+\CommentTok{#   left_join(divestim$AsyEst, by = "Site")}
 
-\NormalTok{hill.water <-}\StringTok{ }\KeywordTok{as_tibble}\NormalTok{(hill.estim) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{)}
-\NormalTok{hill.water.rich <-}\StringTok{ }\KeywordTok{subset}\NormalTok{(hill.water, Diversity }\OperatorTok{==}\StringTok{ "Species richness"}\NormalTok{)}
-\NormalTok{hill.water.shan <-}\StringTok{ }\KeywordTok{subset}\NormalTok{(hill.water, Diversity }\OperatorTok{==}\StringTok{ "Shannon diversity"}\NormalTok{)}
-\NormalTok{hill.water.simp <-}\StringTok{ }\KeywordTok{subset}\NormalTok{(hill.water, Diversity }\OperatorTok{==}\StringTok{ "Simpson diversity"}\NormalTok{)}
+\NormalTok{hill.water <-}\StringTok{ }\KeywordTok{as_tibble}\NormalTok{(divestim.df) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(alpha.div, }\DataTypeTok{var =} \StringTok{"site"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(habitat }\OperatorTok{==}\StringTok{ "Water"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
 
-\NormalTok{hill.water.mod.rich <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Estimator }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ hill.water.rich)}
-\NormalTok{hill.water.mod.shan <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Estimator }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ hill.water.shan)}
-\NormalTok{hill.water.mod.simp <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(Estimator }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ hill.water.simp)}
+\begin{verbatim}
+## Warning: Column `site` joining factor and character vector, coercing into
+## character vector
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{hill.water.rich <-}\StringTok{ }\KeywordTok{subset}\NormalTok{(hill.water, order }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{)}
+\NormalTok{hill.water.shan <-}\StringTok{ }\KeywordTok{subset}\NormalTok{(hill.water, order }\OperatorTok{==}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{hill.water.simp <-}\StringTok{ }\KeywordTok{subset}\NormalTok{(hill.water, order }\OperatorTok{==}\StringTok{ }\DecValTok{2}\NormalTok{)}
+
+\NormalTok{hill.water.mod.rich <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(qD }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ hill.water.rich)}
+\NormalTok{hill.water.mod.shan <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(qD }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ hill.water.shan)}
+\NormalTok{hill.water.mod.simp <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(qD }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ hill.water.simp)}
 
 \CommentTok{# summary(hill.water.mod.rich)}
 \CommentTok{# summary(hill.water.mod.shan)}
@@ -411,7 +554,6 @@ levels of q, which differentially weight common versus rare species.
          \StringTok{"Std. Error"}\NormalTok{ =}\StringTok{ }\NormalTok{std.error, }
          \StringTok{"Statistic"}\NormalTok{ =}\StringTok{ }\NormalTok{statistic, }
          \StringTok{"p-value"}\NormalTok{ =}\StringTok{ }\NormalTok{p.value) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{filter}\NormalTok{(Term }\OperatorTok{!=}\StringTok{ "(Intercept)"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{select}\NormalTok{(Diversity, }\KeywordTok{everything}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{pander}\NormalTok{(}\DataTypeTok{round =} \DecValTok{4}\NormalTok{)}
 \end{Highlighting}
@@ -437,13 +579,26 @@ p-value\strut
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Richness\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
+(Intercept)\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
+350.5\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+121.5\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+2.885\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.0072\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering\strut
+Richness\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 distance\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
-4.461\strut
+3.544\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.5005\strut
+0.5111\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-8.912\strut
+6.933\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
 0\strut
 \end{minipage}\tabularnewline
@@ -452,104 +607,130 @@ Richness\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 moleculeRNA\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
-1.364\strut
+-67.95\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-167.2\strut
+170.7\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-0.0082\strut
+-0.398\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.9935\strut
+0.6935\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Richness\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 distance:moleculeRNA\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
--4.568\strut
+-3.531\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.7043\strut
+0.7192\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
--6.486\strut
+-4.91\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
 0\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Shannon\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
+(Intercept)\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
+55.27\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+24.9\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+2.22\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+0.0342\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering\strut
+Shannon\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 distance\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
-0.2892\strut
+0.277\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.1084\strut
+0.1048\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-2.669\strut
+2.644\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.0122\strut
+0.0129\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Shannon\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 moleculeRNA\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
--38.48\strut
+-38.34\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-36.2\strut
+34.99\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
--1.063\strut
+-1.096\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.2963\strut
+0.2819\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Shannon\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 distance:moleculeRNA\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
--0.2798\strut
+-0.2675\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-0.1525\strut
+0.1474\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
--1.835\strut
+-1.815\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.0765\strut
+0.0796\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.12\columnwidth}\centering\strut
+Simpson\strut
+\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
+(Intercept)\strut
+\end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
+31.56\strut
+\end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
+7.659\strut
+\end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
+4.12\strut
+\end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
+3e-04\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Simpson\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 distance\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
-0.0521\strut
+0.0522\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
 0.0322\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
-1.62\strut
+1.621\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.1158\strut
+0.1154\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Simpson\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 moleculeRNA\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
--23.84\strut
+-23.75\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
-10.74\strut
+10.76\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
--2.22\strut
+-2.207\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.0341\strut
+0.0351\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.12\columnwidth}\centering\strut
 Simpson\strut
 \end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\centering\strut
 distance:moleculeRNA\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering\strut
--0.0381\strut
+-0.0382\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering\strut
 0.0453\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering\strut
--0.8415\strut
+-0.8427\strut
 \end{minipage} & \begin{minipage}[t]{0.09\columnwidth}\centering\strut
-0.4067\strut
+0.406\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -577,22 +758,21 @@ distance:moleculeRNA\strut
   \CommentTok{#facet_grid(Diversity ~ ., scales = "free")}
 
 \CommentTok{# postitions for labels}
-\NormalTok{xpos =}\StringTok{ }\KeywordTok{max}\NormalTok{((}\KeywordTok{na.omit}\NormalTok{(hill.estim}\OperatorTok{$}\NormalTok{distance)))}
+\NormalTok{xpos =}\StringTok{ }\KeywordTok{max}\NormalTok{((}\KeywordTok{na.omit}\NormalTok{(hill.water}\OperatorTok{$}\NormalTok{distance)))}
 \NormalTok{yposDNA =}\StringTok{ }\KeywordTok{predict}\NormalTok{(hill.water.mod.rich, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{distance =} \DecValTok{400}\NormalTok{, }\DataTypeTok{molecule =} \StringTok{"DNA"}\NormalTok{))}
 \NormalTok{yposRNA =}\StringTok{ }\KeywordTok{predict}\NormalTok{(hill.water.mod.rich, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{distance =} \DecValTok{400}\NormalTok{, }\DataTypeTok{molecule =} \StringTok{"RNA"}\NormalTok{))}
-\NormalTok{alpha.fig <-}\StringTok{ }\NormalTok{hill.estim }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{, Diversity }\OperatorTok{==}\StringTok{ "Species richness"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\NormalTok{alpha.fig <-}\StringTok{ }\NormalTok{hill.water }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{, order }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{molecule =} \KeywordTok{ifelse}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{, }\StringTok{"Total"}\NormalTok{, }\StringTok{"Active"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
-\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ Estimator, }
-             \DataTypeTok{ymin =}\NormalTok{ LCL, }\DataTypeTok{ymax =}\NormalTok{ UCL,}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ qD, }
+             \DataTypeTok{ymin =}\NormalTok{ qD.LCL, }\DataTypeTok{ymax =}\NormalTok{ qD.UCL,}
              \DataTypeTok{color =}\NormalTok{ molecule, }\DataTypeTok{fill =}\NormalTok{ molecule, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =}\DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\CommentTok{# geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), }
-\StringTok{  }\CommentTok{#                width = 10, alpha = 0.5) +}
+\StringTok{  }\CommentTok{# geom_errorbar(size = .5, width = 10, alpha = 0.5) +}
 \StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{linetype =}\NormalTok{ molecule)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
        \DataTypeTok{y =} \StringTok{"Estimated richness"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{,}\DecValTok{0}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{breaks =} \KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{3000}\NormalTok{, }\DataTypeTok{by =} \DecValTok{500}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{(}\DataTypeTok{breaks =} \KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{2500}\NormalTok{, }\DataTypeTok{by =} \DecValTok{500}\NormalTok{)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_color_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}\DataTypeTok{values =}\NormalTok{ my.cols) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
@@ -601,7 +781,7 @@ distance:moleculeRNA\strut
            \DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{375}\NormalTok{, }\DataTypeTok{y =}\NormalTok{ yposDNA }\OperatorTok{+}\StringTok{ }\DecValTok{300}\NormalTok{, }
            \DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \DecValTok{2750}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \DecValTok{2500}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
            \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,}\KeywordTok{round}\NormalTok{(}\KeywordTok{summary}\NormalTok{(hill.water.mod.rich)}\OperatorTok{$}\NormalTok{r.squared, }\DecValTok{2}\NormalTok{)), }\DataTypeTok{parse =}\NormalTok{ T) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/alpha_fig.pdf"}\NormalTok{)}
 \NormalTok{alpha.fig}
@@ -646,6 +826,17 @@ to the soil community.
 
 \CommentTok{# Calculate Linear Model}
 \NormalTok{model.terr <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(bray.mean }\OperatorTok{~}\StringTok{ }\NormalTok{distance }\OperatorTok{*}\StringTok{ }\NormalTok{molecule, }\DataTypeTok{data =}\NormalTok{ UL.sim)}
+\KeywordTok{predict}\NormalTok{(model.terr, }\DataTypeTok{newdata =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{distance =} \DecValTok{400}\NormalTok{, }\DataTypeTok{molecule =} \KeywordTok{c}\NormalTok{(}\StringTok{"RNA"}\NormalTok{, }\StringTok{"DNA"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          1          2 
+## 0.03070577 0.18754706
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \KeywordTok{pander}\NormalTok{(model.terr)}
 \end{Highlighting}
 \end{Shaded}
@@ -1108,7 +1299,7 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_x_reverse}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{400}\NormalTok{,}\DecValTok{0}\NormalTok{)) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{() }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{sides =} \StringTok{"l"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{sides =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
        \DataTypeTok{y =} \StringTok{"Dormant soil taxa in reservoir"}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{0}\NormalTok{, }\DataTypeTok{y =} \KeywordTok{max}\NormalTok{(terr.rich), }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}

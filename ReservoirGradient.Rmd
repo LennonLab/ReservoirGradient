@@ -112,7 +112,7 @@ OTUs <- OTUs[match(rownames(design), rownames(OTUs)),]
 Here, we remove OTUs with low incidence across sites, we remove any samples with low coverage, and we standardize the OTU table by log-transforming the abundances and relativizing by site. 
 ```{r}
 # Remove OTUs with less than two occurences across all sites
-OTUs <- OTUs[, which(colSums(OTUs) >= 2)]
+#OTUs <- OTUs[, which(colSums(OTUs) >= 2)]
 
 # Sequencing Coverage
 coverage <- rowSums(OTUs)
@@ -121,7 +121,8 @@ coverage <- rowSums(OTUs)
 lows <- which(coverage < 10000)
 OTUs <- OTUs[-which(coverage < 10000), ]
 design <- design[-which(coverage < 10000), ]
-# Remove OTUs with less than two occurences across all sites
+otus.for.inext <-  t(OTUs)
+# Remove OTUs with < 2 occurences across all sites
 OTUs <- OTUs[, which(colSums(OTUs) >= 2)]
 coverage <- rowSums(OTUs)
 set.seed(47405)
@@ -185,49 +186,64 @@ shan <- diversity(OTUs, index = "shannon")
 exp.shan <- exp(shan)
 alpha.div <- cbind(design, S.obs, simpsE, shan, exp.shan)
 
+# define singleton estimator from Chiu and Chao 2016 PeerJ
+source("bin/Chao_functions.R")
 
-# # estimate asymptotic richness
-#divestim <- iNEXT(t(OTUs), datatype = "abundance", nboot = 999)
-#saveRDS(divestim, file = "intermediate-data/inext-output-999boots.rda")
-divestim <- read_rds("intermediate-data/inext-output-999boots.rda")
-divestim.df <- fortify(divestim) %>% 
-  mutate(habitat = str_to_title(design[as.character(site),"type"]))
+# # estimate richness
+singleton.apply <- function(x){
+  singleton.Est(x, "abundance")$corrected.data
+}
+
+otus.for.inext <- apply(otus.for.inext, MARGIN = 2, singleton.apply)
+# divestim <- estimateD(otus.for.inext, datatype = "abundance", 
+#           base = "size", conf = 0.95)
+# divestim <- iNEXT(otus.for.inext, datatype = "abundance", 
+#                   size =  min(coverage), nboot = 999)
+# divestim$iNextEst
+# saveRDS(divestim, file = "intermediate-data/inext-output.rda")
+divestim <- read_rds("intermediate-data/inext-output.rda")
+divestim
+divestim.df <- divestim %>% 
+ mutate(habitat = str_to_title(design[as.character(site),"type"]))
 ```
 
 Here is the resulting curve, showing the higher diversity in soil samples relative to the lake samples. 
 ```{r rare_extrap_plot, fig.asp = 3/4}
-divestim.df %>% 
-  ggplot(aes(x = x, y = y, 
-             ymin = y.lwr, ymax = y.upr, 
-             color = habitat, fill = habitat, group = site)) +
-  geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
-  geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
-  geom_line(alpha = 1, linetype = "dashed") +
-  scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
-  labs(x = "Sample size", y = "Estimated richness") +
-  theme(legend.position = "none") +
-  #theme(legend.position =  c(.88,.5)) +
-  annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) + 
-  annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) + 
-  scale_color_grey(end = .7) +
-  scale_fill_grey(end = .7)
+# divestim.df %>% 
+#   ggplot(aes(x = x, y = y, 
+#              ymin = y.lwr, ymax = y.upr, 
+#              color = habitat, fill = habitat, group = site)) +
+#   geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
+#   geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
+#   geom_line(alpha = 1, linetype = "dashed") +
+#   scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
+#   labs(x = "Sample size", y = "Estimated richness") +
+#   theme(legend.position = "none") +
+#   #theme(legend.position =  c(.88,.5)) +
+#   annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) + 
+#   annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) + 
+#   scale_color_grey(end = .7) +
+#   scale_fill_grey(end = .7)
 ```
 
 Next, we'll extract the estimates for the Hill numbers at different levels of q, which differentially weight common versus rare species.
 ```{r hill_numbers}
-hill.estim <- divestim$AsyEst %>% filter(Diversity == "Species richness") %>% 
-  left_join(rownames_to_column(alpha.div), by = c("Observed" = "S.obs")) %>% 
-  select(Site, rowname, station, molecule, type, distance) %>% 
-  left_join(divestim$AsyEst, by = "Site")
 
-hill.water <- as_tibble(hill.estim) %>% filter(type == "water")
-hill.water.rich <- subset(hill.water, Diversity == "Species richness")
-hill.water.shan <- subset(hill.water, Diversity == "Shannon diversity")
-hill.water.simp <- subset(hill.water, Diversity == "Simpson diversity")
+# hill.estim <- divestim$AsyEst %>% filter(Diversity == "Species richness") %>% 
+#   left_join(rownames_to_column(alpha.div), by = c("Observed" = "S.obs")) %>% 
+#   select(Site, rowname, station, molecule, type, distance) %>% 
+#   left_join(divestim$AsyEst, by = "Site")
 
-hill.water.mod.rich <- lm(Estimator ~ distance * molecule, data = hill.water.rich)
-hill.water.mod.shan <- lm(Estimator ~ distance * molecule, data = hill.water.shan)
-hill.water.mod.simp <- lm(Estimator ~ distance * molecule, data = hill.water.simp)
+hill.water <- as_tibble(divestim.df) %>% 
+  left_join(rownames_to_column(alpha.div, var = "site")) %>% 
+  filter(habitat == "Water")
+hill.water.rich <- subset(hill.water, order == 0)
+hill.water.shan <- subset(hill.water, order == 1)
+hill.water.simp <- subset(hill.water, order == 2)
+
+hill.water.mod.rich <- lm(qD ~ distance * molecule, data = hill.water.rich)
+hill.water.mod.shan <- lm(qD ~ distance * molecule, data = hill.water.shan)
+hill.water.mod.simp <- lm(qD ~ distance * molecule, data = hill.water.simp)
 
 # summary(hill.water.mod.rich)
 # summary(hill.water.mod.shan)
@@ -250,7 +266,6 @@ hill.water.mods %>%
          "Std. Error" = std.error, 
          "Statistic" = statistic, 
          "p-value" = p.value) %>% 
-  filter(Term != "(Intercept)") %>% 
   select(Diversity, everything()) %>% 
   pander(round = 4)
 ```
@@ -277,22 +292,21 @@ hill.water.mods %>%
   #facet_grid(Diversity ~ ., scales = "free")
 
 # postitions for labels
-xpos = max((na.omit(hill.estim$distance)))
+xpos = max((na.omit(hill.water$distance)))
 yposDNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 400, molecule = "DNA"))
 yposRNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 400, molecule = "RNA"))
-alpha.fig <- hill.estim %>% filter(type == "water", Diversity == "Species richness") %>% 
+alpha.fig <- hill.water %>% filter(type == "water", order == 0) %>% 
   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
-  ggplot(aes(x = distance, y = Estimator, 
-             ymin = LCL, ymax = UCL,
+  ggplot(aes(x = distance, y = qD, 
+             ymin = qD.LCL, ymax = qD.UCL,
              color = molecule, fill = molecule, shape = molecule)) + 
   geom_point(size =3, alpha = 0.8) + 
-  # geom_errorbar(size = .5, aes(ymin = Estimator - s.e., ymax = Estimator + s.e.), 
-  #                width = 10, alpha = 0.5) +
+  # geom_errorbar(size = .5, width = 10, alpha = 0.5) +
   geom_smooth(method = "lm", aes(linetype = molecule)) +
   labs(x = "Reservoir distance (m)",
        y = "Estimated richness") +
   scale_x_reverse(limits = c(400,0)) +
-  scale_y_continuous(breaks = seq(0, 3000, by = 500)) +
+  scale_y_continuous(breaks = seq(0, 2500, by = 500)) +
   scale_color_manual(values = my.cols) +
   scale_fill_manual(values = my.cols) +
   theme(legend.position = "none") +
@@ -301,7 +315,7 @@ alpha.fig <- hill.estim %>% filter(type == "water", Diversity == "Species richne
            label = "Active", size = 5) +
   annotate("text", x = 375, y = yposDNA + 300, 
            label = "Total", size = 5) +
-  annotate(geom = "text", x = 0, y = 2750, hjust = 1, vjust = 1, size = 5,
+  annotate(geom = "text", x = 0, y = 2500, hjust = 1, vjust = 1, size = 5,
            label = paste0("r^2== ",round(summary(hill.water.mod.rich)$r.squared, 2)), parse = T) +
   ggsave("figures/alpha_fig.pdf")
 alpha.fig
@@ -325,6 +339,7 @@ UL.sim       <- cbind(design[-c(1:3), ], bray.mean, bray.se)
 
 # Calculate Linear Model
 model.terr <- lm(bray.mean ~ distance * molecule, data = UL.sim)
+predict(model.terr, newdata = data.frame(distance = 400, molecule = c("RNA", "DNA")))
 pander(model.terr)
 
 # # Calculate Confidance Intervals of Model
@@ -845,9 +860,8 @@ cbind.data.frame(UL.ts.design[which(UL.ts.design$sample.type == "RNA"),], OTUs.i
 Many of them do appear to track the seasons quite well, suggesting there could be a seasonality component to the role of terrestrial inputs into the reservoir. 
 
 
-# Not-included
 ## Ecosystem functions
-```{r metabolism, results='hide', eval = TRUE}
+```{r metabolism}
 metab <- read.table("data/res.grad.metab.txt", sep="\t", header=TRUE)
 colnames(metab) <- c("dist", "BP", "BR")
 BGE <- round((metab$BP/(metab$BP + metab$BR)),3)
@@ -909,134 +923,45 @@ plot_grid(BP.plot + theme(axis.title.x = element_blank(), axis.text.x = element_
           BR.plot + theme(axis.title.x = element_blank(), axis.text.x = element_blank(),
                           plot.margin = unit(c(-1, 1, -1, 0), "cm")), 
           BGE.plot + theme(plot.margin = unit(c(-1, 1, 0, 0), "cm")), 
-          align = "hv", ncol = 1, labels = "AUTO")
+          align = "hv", ncol = 1, labels = "auto")
 ```
 
 ## Relation of ecosystem functions and community structure
-```{r, eval=FALSE}
+```{r, fig.asp=3*3/4}
 # detrend the spatial signal
-bp.resid <- resid(lm(BP ~ dist + I(dist)^2, data = metab))
-br.resid <- resid(lm(BR ~ dist, data = metab))
+metab.joined <- cbind.data.frame(design.dna, metab[-5,])
 
+transient.metabolism <- cbind.data.frame(transients = terr.rich, metab.joined) 
 
-metab.resids <- metab
-metab.resids$BR_resid <- br.resid + mean(metab$BR)
-metab.resids$BP_resid <- bp.resid + mean(metab$BP)
+p1 <- transient.metabolism %>% 
+  ggplot(aes(x=transients, y = BP)) +
+  geom_smooth(color = "black") +
+  geom_point() + 
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(x = "Terrestrial-derived taxa",
+       y = expression(paste('BP (', mu ,'M C h'^-1* ')'))) +
+  theme(axis.title.x = element_blank(), 
+                          plot.margin = unit(c(1, 1, 0, 0), "cm"))
+p2 <- transient.metabolism %>% 
+  ggplot(aes(x=transients, y = BR)) +
+  geom_smooth(color = "black") +
+  geom_point() + 
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(x = "Terrestrial-derived taxa",
+       y = expression(paste('BR (', mu ,'M C h'^-1* ')'))) +
+  theme(axis.title.x = element_blank(),
+                          plot.margin = unit(c(0, 1, 0, 0), "cm"))
+p3 <- transient.metabolism %>% 
+  ggplot(aes(x=transients, y = BGE)) +
+  geom_smooth(color = "black") +
+  geom_point() + 
+  scale_x_continuous(limits = c(0, NA)) +
+  labs(x = "Terrestrial-derived taxa") +
+  theme(plot.margin = unit(c(0, 1, 0, 0), "cm"))
 
-transient.metabolism <- data.frame(transients = terr.REL, dist = design.dna$distance) %>% 
-  left_join(metab.resids) 
-
-
-bp.mod.quad <- lm(BP_resid ~ transients + I(transients^2), data = transient.metabolism)
-bp.mod.lin <- lm(BP_resid ~ transients, data = transient.metabolism)
-bp.mod.int <- lm(BP_resid ~ 1, data = transient.metabolism)
-anova(bp.mod.int, bp.mod.lin, bp.mod.quad)
-AIC(bp.mod.quad, bp.mod.lin, bp.mod.int)
-
-br.mod.quad <- lm(BR_resid ~ transients + I(transients^2), data = transient.metabolism)
-br.mod.lin <- lm(BR_resid ~ transients, data = transient.metabolism)
-br.mod.int <- lm(BR_resid ~ 1, data = transient.metabolism)
-anova(br.mod.int, br.mod.lin, br.mod.quad)
-AIC(br.mod.int, br.mod.lin, br.mod.quad)
-
-bge.mod.quad <- lm(BGE ~ transients + I(transients^2), data = transient.metabolism)
-bge.mod.lin <- lm(BGE ~ transients, data = transient.metabolism)
-bge.mod.int <- lm(BGE ~ 1, data = transient.metabolism)
-anova(bge.mod.int, bge.mod.lin, bge.mod.quad)
-AIC(bge.mod.int, bge.mod.lin, bge.mod.quad)
-
-round(summary(br.mod.quad)$r.squared, 2)
-round(summary(bp.mod.quad)$r.squared, 2)
-
-
-total_core <- rowSums(OTUsREL[design$molecule == "DNA" & design$type == "water",
-                               subset(rbind.data.frame(high.activity.water.core, 
-                                                       high.activity.soil.core), RNA.max > .01)$OTU])
-
-summary(lm(BP ~ transients * dist, transient.metabolism))
-summary(lm(BR ~ transients * dist, transient.metabolism))
-
-
-data.frame(
-  soil_core = rowSums(OTUsREL[design$molecule == "DNA" & design$type == "water",
-           subset(soil.vs.lake.abunds, RNA.max > .01)$OTU]), 
-  dist = design.dna$distance) %>% 
-  left_join(metab.resids) %>% select(-BGE, -BP, -BR) %>% gather(metab, value, -soil_core, -dist) %>% 
-  ggplot(aes(x = soil_core, y = value, color = metab, fill = metab)) +
-  geom_point(size = 2) + 
-  geom_smooth(alpha = .25, method = 'lm', formula = y ~ x + I(x^2)) +
-  labs(x = "Relative Abundance of Soil-derived Core",
-       y = expression(paste('Metabolism (', mu ,'M C h'^-1* ')'))) +
-  scale_color_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  scale_fill_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  ggsave("figures/06_soilcore-function.pdf", bg = "white", width = 7, height = 6)
-
-data.frame(
-  water_core = rowSums(OTUsREL[design$molecule == "DNA" & design$type == "water",
-                               subset(high.activity.water.core, RNA.max > .01)$OTU]), 
-  dist = design.dna$distance) %>% 
-  left_join(metab.resids) %>% select(-BGE,-BR,-BP) %>% gather(metab, value, -water_core, -dist) %>% 
-  ggplot(aes(x = water_core, y = value, color = metab, fill = metab)) +
-  geom_point(size = 2) + 
-  geom_smooth(alpha = .25, method = 'lm', formula = y ~ x + I(x^2)) +
-  labs(x = "Relative Abundance of non-soil-derived Core",
-       y = expression(paste('Metabolism (', mu ,'M C h'^-1* ')'))) +
-  scale_color_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  scale_fill_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  ggsave("figures/06_nonsoilcore-function.pdf", bg = "white", width = 7, height = 6)
-
-
-
-data.frame(transients = resid(lm(terr.REL ~ design.dna$distance)) + mean(terr.REL), dist = design.dna$distance) %>% 
-  left_join(metab.resids) %>% select(-BGE, -BP, -BR) %>% gather(metab, value, -transients, -dist) %>% 
-  ggplot(aes(x = transients, y = value, color = metab, fill = metab)) +
-  geom_point(size = 2, show.legend = F) + 
-  geom_smooth(alpha = .25, method = 'lm', formula = y ~ x, show.legend = F) +
-  annotation_logticks(sides = "b") +
-  labs(x = "Relative Abundance of Transient Taxa",
-       y = expression(paste('Metabolism (', mu ,'M C h'^-1* ')'))) +
-  scale_color_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  scale_fill_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  scale_y_continuous(limits = c(0,3)) +
-  theme(plot.margin = unit(c(1,1,0,0), "cm")) +
-  ggsave("figures/06_transients-function.pdf", bg = "white", width = 7, height = 6)
-
-
-core.metab <- data.frame(
-  total_core = rowSums(OTUsREL[design$molecule == "DNA" & design$type == "water",
-                               subset(rbind.data.frame(high.activity.water.core, 
-                                                       high.activity.soil.core), RNA.max > .01)$OTU]), 
-  dist = design.dna$distance) %>% 
-  left_join(metab.resids)
-
-summary(lm(BP ~ total_core * dist, core.metab))
-summary(lm(BR ~ total_core + dist, core.metab))
-
-
-core.metab <- data.frame(
-  total_core = rowSums(OTUsREL[design$molecule == "DNA" & design$type == "water",
-                               subset(rbind.data.frame(high.activity.water.core, 
-                                                       high.activity.soil.core), RNA.max > .01)$OTU]), 
-  dist = design.dna$distance) %>% 
-  left_join(metab.resids)
-core.metab$total_core_resid <- resid(lm(total_core ~ dist + I(dist^2), core.metab)) + mean(core.metab$total_core)
-summary(lm(BP_resid ~ total_core, core.metab))
-summary(lm(BR_resid ~ total_core + I(total_core^2), core.metab))
-
-
-core.metab %>% select(-BGE, -BP, -BR, -total_core) %>% gather(metab, value, -total_core_resid, -dist) %>% 
-  ggplot(aes(x = total_core_resid, y = value, color = metab, fill = metab)) +
-  geom_point(size = 2, show.legend = F) + 
-  geom_smooth(alpha = .25, method = 'lm', formula = y ~ x, show.legend = F) +
-  labs(x = "Relative Abundance of Core Taxa",
-       y = expression(paste('Metabolism (', mu ,'M C h'^-1* ')'))) +
-  scale_color_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  scale_fill_viridis("Ecosystem Function", discrete = T, begin = .1, end = .6, option = "D") +
-  scale_y_continuous(limits = c(0,3)) +
-  theme(plot.margin = unit(c(1,1,0,0), "cm")) +
-  ggsave("figures/06_core-function.pdf", bg = "white", width = 7, height = 6)
-
-
-
+plot_grid(p1, NULL, p2, NULL, p3, 
+          rel_heights = c(1, -.15, 1, -.15, 1), align = "hv", 
+          ncol = 1, labels = c("a", "NULL", "b", "NULL", "c")) +
+  ggsave("figures/functions.pdf")
 ```
 
