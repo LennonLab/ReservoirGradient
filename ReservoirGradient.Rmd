@@ -98,14 +98,17 @@ OTU.tax <- read.tax(taxonomy = taxon, format = "rdp")
 
 # Load environmental data
 env.dat <- read.csv("data/ResGrad_EnvDat.csv", header = TRUE)
-env.dat <- env.dat[-16,]
+env.dat <- env.dat[-c(16,17,18),]
 
 # Subset to just the reservoir gradient sites
 OTUs <- OTUs[str_which(rownames(OTUs), "RG"),]
 OTUs <- OTUs[-which(rownames(OTUs) == "RGMockComm"),]
 
 # make sure OTU table matches up with design order
+design <- design[-c(34:39),]
 OTUs <- OTUs[match(rownames(design), rownames(OTUs)),]
+design$distance <- max(na.omit(design$distance)) - design$distance
+env.dat$distance <- max(na.omit(env.dat$dist.dam)) - env.dat$dist.dam
 ```
 
 ## Clean and transform OTU table
@@ -145,11 +148,11 @@ facet.labs <- c(`chla` = "Chlorophyll-a",
                 `pH` = "pH",
                 `TP` = "Total Phosphorus")
 
-env.dat %>% select(dist.dam, DO, pH, TP, chla) %>% 
-  gather(variable, value, -dist.dam) %>% 
-  ggplot(aes(x = dist.dam, y = value)) + 
+env.dat %>% select(distance, DO, pH, TP, chla) %>% 
+  gather(variable, value, -distance) %>% 
+  ggplot(aes(x = distance, y = value)) + 
   geom_point() + 
-  geom_smooth(method = "lm", color = "black") + 
+  geom_smooth(method = "loess", color = "black") + 
   facet_grid(variable ~., scales = "free", switch = "y", 
              labeller = as_labeller(facet.labs)) + 
   theme(strip.background = element_blank(), 
@@ -157,8 +160,8 @@ env.dat %>% select(dist.dam, DO, pH, TP, chla) %>%
         strip.placement = "outside") + 
   labs(x = "Reservoir distance (m)",
        y = "") +
-  scale_x_reverse() +
-  scale_y_continuous()
+  scale_y_continuous() +
+  ggsave("figures/env_vars.pdf")
 ```
 
 So, there are some weak gradients, but nothing too prevailing. 
@@ -169,7 +172,7 @@ Now, we will analyze the bacterial diversity in the reservoir and nearby soils t
 ## How does \(\alpha\)-diversity vary along the reservoir?
 
 First, we use the method of rarefaction and extrapolation developed by Chao et al. in the iNEXT package.
-```{r rarefaction-extrapolation}
+```{r rarefaction-extrapolation, cache=TRUE}
 # Observed Richness
 S.obs <- rowSums((OTUs > 0) * 1)
 
@@ -195,35 +198,34 @@ singleton.apply <- function(x){
 }
 
 otus.for.inext <- apply(otus.for.inext, MARGIN = 2, singleton.apply)
-# divestim <- estimateD(otus.for.inext, datatype = "abundance", 
-#           base = "size", conf = 0.95)
-# divestim <- iNEXT(otus.for.inext, datatype = "abundance", 
-#                   size =  min(coverage), nboot = 999)
-# divestim$iNextEst
-# saveRDS(divestim, file = "intermediate-data/inext-output.rda")
-divestim <- read_rds("intermediate-data/inext-output.rda")
-divestim
+divestim <- estimateD(otus.for.inext, datatype = "abundance",
+          base = "size", conf = 0.95)
+divestim <- iNEXT(otus.for.inext, datatype = "abundance",
+                  size =  min(coverage), nboot = 999)
+divestim$iNextEst
+saveRDS(divestim, file = "intermediate-data/inext-output.rda")
+divestim <- readRDS("intermediate-data/inext-output.rda")
 divestim.df <- divestim %>% 
  mutate(habitat = str_to_title(design[as.character(site),"type"]))
 ```
 
 Here is the resulting curve, showing the higher diversity in soil samples relative to the lake samples. 
 ```{r rare_extrap_plot, fig.asp = 3/4}
-# divestim.df %>% 
-#   ggplot(aes(x = x, y = y, 
-#              ymin = y.lwr, ymax = y.upr, 
-#              color = habitat, fill = habitat, group = site)) +
-#   geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
-#   geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
-#   geom_line(alpha = 1, linetype = "dashed") +
-#   scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
-#   labs(x = "Sample size", y = "Estimated richness") +
-#   theme(legend.position = "none") +
-#   #theme(legend.position =  c(.88,.5)) +
-#   annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) + 
-#   annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) + 
-#   scale_color_grey(end = .7) +
-#   scale_fill_grey(end = .7)
+divestim.df %>%
+  ggplot(aes(x = x, y = y,
+             ymin = y.lwr, ymax = y.upr,
+             color = habitat, fill = habitat, group = site)) +
+  geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
+  geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
+  geom_line(alpha = 1, linetype = "dashed") +
+  scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
+  labs(x = "Sample size", y = "Estimated richness") +
+  theme(legend.position = "none") +
+  #theme(legend.position =  c(.88,.5)) +
+  annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) +
+  annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) +
+  scale_color_grey(end = .7) +
+  scale_fill_grey(end = .7)
 ```
 
 Next, we'll extract the estimates for the Hill numbers at different levels of q, which differentially weight common versus rare species.
@@ -234,7 +236,8 @@ Next, we'll extract the estimates for the Hill numbers at different levels of q,
 #   select(Site, rowname, station, molecule, type, distance) %>% 
 #   left_join(divestim$AsyEst, by = "Site")
 
-hill.water <- as_tibble(divestim.df) %>% 
+hill.water <- divestim.df %>% 
+  filter(site %in% rownames(OTUs)) %>% 
   left_join(rownames_to_column(alpha.div, var = "site")) %>% 
   filter(habitat == "Water")
 hill.water.rich <- subset(hill.water, order == 0)
@@ -293,29 +296,27 @@ hill.water.mods %>%
 
 # postitions for labels
 xpos = max((na.omit(hill.water$distance)))
-yposDNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 400, molecule = "DNA"))
-yposRNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 400, molecule = "RNA"))
+yposDNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 0, molecule = "DNA"))
+yposRNA = predict(hill.water.mod.rich, newdata = data.frame(distance = 0, molecule = "RNA"))
 alpha.fig <- hill.water %>% filter(type == "water", order == 0) %>% 
   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
   ggplot(aes(x = distance, y = qD, 
              ymin = qD.LCL, ymax = qD.UCL,
-             color = molecule, fill = molecule, shape = molecule)) + 
-  geom_point(size =3, alpha = 0.8) + 
+             shape = molecule)) + 
   # geom_errorbar(size = .5, width = 10, alpha = 0.5) +
-  geom_smooth(method = "lm", aes(linetype = molecule)) +
+  geom_smooth(method = "lm", aes(linetype = molecule), color = "black") +
+  geom_point(size =3, alpha = 0.8) + 
   labs(x = "Reservoir distance (m)",
        y = "Estimated richness") +
-  scale_x_reverse(limits = c(400,0)) +
-  scale_y_continuous(breaks = seq(0, 2500, by = 500)) +
-  scale_color_manual(values = my.cols) +
-  scale_fill_manual(values = my.cols) +
+  scale_y_continuous(breaks = seq(0, 2000, by = 500)) +
+  scale_x_continuous(limits = c(-49, 350)) +
   theme(legend.position = "none") +
   guides(fill = guide_legend(override.aes=list(fill=NA))) +
-  annotate("text", x = 375, y = yposRNA + 300, 
+  annotate("text", x = -33, y = yposRNA , 
            label = "Active", size = 5) +
-  annotate("text", x = 375, y = yposDNA + 300, 
+  annotate("text", x = -33, y = yposDNA , 
            label = "Total", size = 5) +
-  annotate(geom = "text", x = 0, y = 2500, hjust = 1, vjust = 1, size = 5,
+  annotate(geom = "text", x = xpos, y = 2000, hjust = 1, vjust = 1, size = 5,
            label = paste0("r^2== ",round(summary(hill.water.mod.rich)$r.squared, 2)), parse = T) +
   ggsave("figures/alpha_fig.pdf")
 alpha.fig
@@ -339,7 +340,7 @@ UL.sim       <- cbind(design[-c(1:3), ], bray.mean, bray.se)
 
 # Calculate Linear Model
 model.terr <- lm(bray.mean ~ distance * molecule, data = UL.sim)
-predict(model.terr, newdata = data.frame(distance = 400, molecule = c("RNA", "DNA")))
+predict(model.terr, newdata = data.frame(distance = 0, molecule = c("RNA", "DNA")))
 pander(model.terr)
 
 # # Calculate Confidance Intervals of Model
@@ -361,22 +362,21 @@ pander(model.terr)
 
 
 ```{r plot_similarity_to_soils, fig.asp = 3/4}
+ypred.act <- predict(model.terr, newdata = data.frame(distance = 0, molecule = "RNA"))
+ypred.tot <- predict(model.terr, newdata = data.frame(distance = 0, molecule = "DNA"))
 similarity.plot <- UL.sim %>% 
   mutate(molecule = ifelse(UL.sim$molecule == "DNA", "Total", "Active")) %>% 
-  ggplot(aes(x = distance, y = bray.mean, 
-             color = molecule, fill = molecule, shape = molecule)) +
+  ggplot(aes(x = distance, y = bray.mean, shape = molecule)) +
+  geom_smooth(method = "lm", aes(linetype = molecule), color = "black", show.legend = T) + 
   geom_point(alpha = 0.8, size = 3, show.legend = T) + 
-  geom_smooth(method = "lm", show.legend = T, aes(linetype = molecule)) + 
   labs(y = str_wrap("Percent similarity to soil community", width = 20), 
        x = "Reservoir distance (m)") + 
-  scale_color_manual(values = my.cols) + 
-  scale_fill_manual(values = my.cols) +
   theme(legend.position = "none") +
-  scale_x_reverse(limits = c(400,0)) + 
-  annotate(geom = "text", x = 0, y = max(UL.sim$bray.mean), hjust = 1, vjust = 1, size = 5,
+  scale_x_continuous(limits = c(-49,350)) + 
+  annotate(geom = "text", x = 350, y = max(UL.sim$bray.mean), hjust = 1, vjust = 1, size = 5,
            label = paste0("r^2== ",round(summary(model.terr)$r.squared, 2)), parse = T) +
-  annotate("text", x = 375, y = .065, label = "Active", size = 5) +
-  annotate("text", x = 375, y = .24, label = "Total", size = 5) +
+  annotate("text", x = -33, y = ypred.act, label = "Active", size = 5) +
+  annotate("text", x = -33, y = ypred.tot, label = "Total", size = 5) +
   ggsave("figures/similarity_fig.pdf")
 
 similarity.plot
@@ -410,6 +410,7 @@ pc_dists <- tibble(
   DNA_dim2 = subset(water.pcvals, molecule == "DNA")$Dim2,
   RNA_dim1 = subset(water.pcvals, molecule == "RNA")$Dim1,
   RNA_dim2 = subset(water.pcvals, molecule == "RNA")$Dim2)
+
 pcoa.fig <- data.frame(scores(ul.pcoa)) %>% 
   rownames_to_column("name") %>% 
   left_join(rownames_to_column(design, "name")) %>% 
@@ -426,13 +427,13 @@ pcoa.fig <- data.frame(scores(ul.pcoa)) %>%
                aes(x = DNA_dim1, y = DNA_dim2,
                    xend = RNA_dim1, yend = RNA_dim2),
                alpha = 0) +
-  #coord_fixed(ratio = 1, xlim = c(-.4, .4)) +
+  coord_fixed(ratio = 1) +
   labs(x = paste0("PCoA 1 (", explainvars[1],"%)"),
        y = paste0("PCoA 2 (", explainvars[2],"%)")) +
-  theme(legend.position = "none") +
-  annotate(geom = "text", x = .2, y = 0, label = "Active", size = 5) +
-  annotate(geom = "text", x = -.25, y = -.3, label = "Total", size = 5) + 
-  annotate(geom = "text", x = .3, y = -.4, label = "Soils", size = 5) +
+  # theme(legend.position = "none") +
+  # annotate(geom = "text", x = .2, y = 0, label = "Active", size = 5) +
+  # annotate(geom = "text", x = -.25, y = -.3, label = "Total", size = 5) + 
+  # annotate(geom = "text", x = .3, y = -.4, label = "Soils", size = 5) +
   ggsave("figures/pcoa.pdf")
 pcoa.fig
 ```
@@ -540,12 +541,11 @@ transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$dista
   ggplot(aes(x = distance, y = transient_rich)) + 
   geom_smooth(method = "lm", color = "black", fill = "grey") +
   geom_point(size = 3, alpha = .8, color = "black") + 
-  scale_x_reverse(limits = c(400,0)) +
   scale_y_log10() +
   annotation_logticks(sides = "l", size = 1) +
   labs(x = "Reservoir distance (m)",
-       y = "Dormant soil taxa in reservoir") +
-  annotate("text", x = 0, y = max(terr.rich), hjust = 1, vjust = 1, size = 5,
+       y = "Inactive soil taxa in reservoir") +
+  annotate("text", x = 350, y = max(terr.rich), hjust = 1, vjust = 1, size = 5,
            label = paste0("r^2== ",T1.R2), parse = T)  +
   ggsave("figures/transients.pdf")
 transient.plot
@@ -609,7 +609,6 @@ bind_rows(in.soil.to.plot, in.lake.to.plot) %>%
        y = "OTU relative abundance") +
   geom_line(alpha = 0.25, stat = "smooth", method = "lm", se = F, show.legend = F) +
   scale_y_log10() +
-  scale_x_reverse() + 
   facet_wrap(~ found, ncol = 1, 
              labeller = as_labeller(c(
                `lake` = "Undetected in soils",
@@ -629,11 +628,11 @@ rownames(soil.core.mods) <- c("slope", "pval")
 # classify otus as significantly increasing or decreasing along reservoir
 soil.core.decreasing <- as.data.frame(t(soil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(slope > 0) %>%   # rel abund decreases toward dam
+  filter(slope < 0) %>%   # rel abund decreases toward dam
   left_join(OTU.tax)
 soil.core.increasing <- as.data.frame(t(soil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(slope < 0) %>%   # rel abund increases toward dam
+  filter(slope > 0) %>%   # rel abund increases toward dam
   left_join(OTU.tax)
 
 nonsoil.core.mods <- apply(in.lake.core.not.soils.REL, MARGIN = 2, 
@@ -641,11 +640,11 @@ nonsoil.core.mods <- apply(in.lake.core.not.soils.REL, MARGIN = 2,
 rownames(nonsoil.core.mods) <- c("slope", "pval")
 nonsoil.core.decreasing <- as.data.frame(t(nonsoil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(slope > 0) %>%   # rel abund decreases toward dam
+  filter(slope < 0) %>%   # rel abund decreases toward dam
   left_join(OTU.tax)
 nonsoil.core.increasing <- as.data.frame(t(nonsoil.core.mods)) %>% 
   rownames_to_column("OTU") %>% 
-  filter(slope < 0) %>%   # rel abund increases toward dam
+  filter(slope > 0) %>%   # rel abund increases toward dam
   left_join(OTU.tax)
 ```
 
@@ -766,20 +765,20 @@ taxon_fate.plot <- df.plot %>% mutate(rel_abund = ifelse(rel_abund == 0, 1e-6, r
   #                       paste0("Decreasing (n = ", n3,")"))) %>% 
   ggplot(aes(x = distance, y = rel_abund, group = OTU)) + 
   #geom_jitter(alpha = 0.15) + 
-  geom_line(stat = "smooth", alpha = 0.15, size = 1,
+  geom_line(stat = "smooth", alpha = 0.3, size = 1,
             method = "loess", span = .7, se = FALSE) +
-  scale_x_reverse(limits = c(400, -50)) +
   scale_y_log10(labels = scales::scientific) +
+  scale_x_continuous(limits = c(0,380)) +
   #theme(legend.position = "none") +
   #guides(color = guide_legend(ncol = 1)) +
   labs(x = "Reservoir distance (m)",
        y = "Active relative abundance") +
-  annotate("text", x = -25, y = 1e-1, size = 5, hjust = 1, vjust = 1, angle = 90,
+  annotate("text", x = 365, y = 1e-1, size = 5, hjust = 1, vjust = 1, angle = 90,
            label = "Maintained") +
-  annotate("text", x = -25, y = 1e-5, size = 5, hjust = 0.5, vjust = 1, angle = 90,
+  annotate("text", x = 365, y = 1e-5, size = 5, hjust = 0.5, vjust = 1, angle = 90,
            label = "Decaying") +
   ggsave("figures/taxa_origins.pdf")
-
+ taxon_fate.plot
 
 # how much do the different core components contribute to total abundances
 in.lake.core.soil.REL <- rowSums(in.lake.core.from.soils) / rowSums(w.dna)
@@ -866,6 +865,8 @@ metab <- read.table("data/res.grad.metab.txt", sep="\t", header=TRUE)
 colnames(metab) <- c("dist", "BP", "BR")
 BGE <- round((metab$BP/(metab$BP + metab$BR)),3)
 metab <- cbind(metab, BGE)
+metab <- metab[-c(16:18),]
+metab$dist <- 350 - metab$dist
 
 
 # Quadratic regression for BP
@@ -893,27 +894,24 @@ BGE.R2
 BP.plot <- ggplot(metab, aes(x = dist, y = BP)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = y ~ x + I(x^2), color = "black") +
-  annotate(geom = "text", x = 50, y = 1.5, size = 5, 
-           label = paste0("R^2== ",BP.R2), parse = T) +
+  annotate(geom = "text", x = 350, y = 1.5, size = 5, hjust = 1, vjust = 1,
+           label = paste0("r^2== ",BP.R2), parse = T) +
   labs(y = expression(paste('BP (', mu ,'M C h'^-1* ')')), 
-       x = "Reservoir Transect (m)") +
-  scale_x_reverse(limits = c(400,0))
+       x = "Reservoir Transect (m)")
 BR.plot <- ggplot(metab, aes(x = dist, y = BR)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = y ~ x, color = "black") + 
-  annotate("text", x = 50, y = 1.5, size = 5, 
-           label = paste0("R^2== ",BR.R2), parse = T ) +
+  annotate("text", x = 350, y = 1.5, size = 5, hjust = 1, vjust = 0,
+           label = paste0("r^2== ",BR.R2), parse = T ) +
   labs(y = expression(paste('BR (', mu ,'M C h'^-1* ')')), 
-       x = "Reservoir Transect (m)") +
-  scale_x_reverse(limits = c(400,0))
+       x = "Reservoir Transect (m)")
 BGE.plot <- ggplot(metab, aes(x = dist, y = BGE)) + 
   geom_point() + 
   geom_smooth(method = "lm", formula = y ~ x + I(x^2), color = "black") +
-  annotate("text", x = 50, y = .5, size = 5, 
+  annotate("text", x = 350, y = .5, size = 5, hjust = 1, vjust = 1,
            label = paste0("R^2== ",BGE.R2), parse = T ) +
   labs(y = "BGE", 
-       x = "Reservoir Transect (m)") +
-  scale_x_reverse(limits = c(400,0))
+       x = "Reservoir Transect (m)")
 ```
 
 
@@ -928,7 +926,6 @@ plot_grid(BP.plot + theme(axis.title.x = element_blank(), axis.text.x = element_
 
 ## Relation of ecosystem functions and community structure
 ```{r, fig.asp=3*3/4}
-# detrend the spatial signal
 metab.joined <- cbind.data.frame(design.dna, metab[-5,])
 
 transient.metabolism <- cbind.data.frame(transients = terr.rich, metab.joined) 
