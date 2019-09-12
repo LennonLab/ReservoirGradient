@@ -77,5 +77,5 @@ This project is the product of the 2013 SSRP work done with Nelson.
 
 [Ariane Peralta](https://www.peraltalab.com/).
 
-[Dr. Jay Lennon](http://www.indiana.edu/~microbes/people.php): Principle Investigator, Associate Professor, Department of Biology, Indiana University, Bloomington. Head of the [Lennon Lab](http://www.indiana.edu/~microbes/people.php).
+[Dr. Jay Lennon](http://www.indiana.edu/~microbes/people.php): Principle Investigator, Professor, Department of Biology, Indiana University, Bloomington. Head of the [Lennon Lab](http://www.indiana.edu/~microbes/people.php).
 
