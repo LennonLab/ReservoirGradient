@@ -2,13 +2,14 @@
 title: "Dormancy and dispersal structure bacterial communities across ecosystem boundaries"
 author: "Nathan I. Wisnoski, Mario E. Muscarella, Megan L. Larsen, and Jay T. Lennon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-header-includes:
-   - \usepackage{array}
-   - \usepackage{graphics}
-output: 
+output:
+  word_document: default
   pdf_document:
-    fig_caption: true
-    keep_tex: true
+    fig_caption: yes
+    keep_tex: yes
+header-includes:
+- \usepackage{array}
+- \usepackage{graphics}
 ---
 
 
@@ -152,7 +153,7 @@ env.dat %>% select(distance, DO, pH, TP, chla) %>%
   gather(variable, value, -distance) %>% 
   ggplot(aes(x = distance, y = value)) + 
   geom_point() + 
-  geom_smooth(method = "loess", color = "black") + 
+  geom_smooth(method = "loess", color = "black", se = F) + 
   facet_grid(variable ~., scales = "free", switch = "y", 
              labeller = as_labeller(facet.labs)) + 
   theme(strip.background = element_blank(), 
@@ -161,7 +162,7 @@ env.dat %>% select(distance, DO, pH, TP, chla) %>%
   labs(x = "Reservoir distance (m)",
        y = "") +
   scale_y_continuous() +
-  ggsave("figures/env_vars.pdf")
+  ggsave("figures/env_vars.pdf", height = 3/4*4*3, width = 4, units = "in")
 ```
 
 So, there are some weak gradients, but nothing too prevailing. 
@@ -197,13 +198,10 @@ singleton.apply <- function(x){
   singleton.Est(x, "abundance")$corrected.data
 }
 
-otus.for.inext <- apply(otus.for.inext, MARGIN = 2, singleton.apply)
-divestim <- estimateD(otus.for.inext, datatype = "abundance",
-          base = "size", conf = 0.95)
-divestim <- iNEXT(otus.for.inext, datatype = "abundance",
-                  size =  min(coverage), nboot = 999)
-divestim$iNextEst
-saveRDS(divestim, file = "intermediate-data/inext-output.rda")
+# otus.for.inext <- apply(otus.for.inext, MARGIN = 2, singleton.apply)
+# divestim <- estimateD(otus.for.inext, datatype = "abundance",
+#           base = "size", conf = 0.95)
+# saveRDS(divestim, file = "intermediate-data/inext-output.rda")
 divestim <- readRDS("intermediate-data/inext-output.rda")
 divestim.df <- divestim %>% 
  mutate(habitat = str_to_title(design[as.character(site),"type"]))
@@ -211,21 +209,21 @@ divestim.df <- divestim %>%
 
 Here is the resulting curve, showing the higher diversity in soil samples relative to the lake samples. 
 ```{r rare_extrap_plot, fig.asp = 3/4}
-divestim.df %>%
-  ggplot(aes(x = x, y = y,
-             ymin = y.lwr, ymax = y.upr,
-             color = habitat, fill = habitat, group = site)) +
-  geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
-  geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
-  geom_line(alpha = 1, linetype = "dashed") +
-  scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
-  labs(x = "Sample size", y = "Estimated richness") +
-  theme(legend.position = "none") +
-  #theme(legend.position =  c(.88,.5)) +
-  annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) +
-  annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) +
-  scale_color_grey(end = .7) +
-  scale_fill_grey(end = .7)
+# divestim.df %>%
+#   ggplot(aes(x = x, y = y,
+#              ymin = y.lwr, ymax = y.upr,
+#              color = habitat, fill = habitat, group = site)) +
+#   geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +
+#   geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +
+#   geom_line(alpha = 1, linetype = "dashed") +
+#   scale_x_continuous(labels = scales::comma, limits = c(0, 90000)) +
+#   labs(x = "Sample size", y = "Estimated richness") +
+#   theme(legend.position = "none") +
+#   #theme(legend.position =  c(.88,.5)) +
+#   annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) +
+#   annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) +
+#   scale_color_grey(end = .7) +
+#   scale_fill_grey(end = .7)
 ```
 
 Next, we'll extract the estimates for the Hill numbers at different levels of q, which differentially weight common versus rare species.
@@ -494,19 +492,16 @@ nvr.act <- which(colSums(lake.and.soil.act) == 0)
 yes.act <- which(colSums(lake.and.soil.act) != 0)
 
 # how many otus are active relative to the total number of otus 
-length(nvr.act) / ncol(lake.and.soil.total)
-length(yes.act) / ncol(lake.and.soil.total)
+length(nvr.act) / ncol(lake.and.soil.total) # 88% of soil-derived bac never active
+length(yes.act) / ncol(soil.total) # 8% of all soil taxa were active in lake
 
 # of taxa who were never active, what fraction of the total community did they represent?
 sum(rowSums(w.dna[,names(nvr.act)]))
 sum(rowSums(w.dna[,names(yes.act)]))
 sum(rowSums(w.dna[,names(nvr.act)])) / sum(rowSums(w.dna))
 
-# of taxa who became active, what fraction of the active community did they represent?
-sum(rowSums(w.rna[,names(nvr.act)]))
-sum(rowSums(w.rna[,names(yes.act)]))
-sum(rowSums(w.rna[,names(nvr.act)])) / sum(rowSums(w.rna))
-sum(rowSums(w.rna[,names(yes.act)])) / sum(rowSums(w.rna))
+# of taxa who became active, what fraction of the dna community did they represent?
+sum(rowSums(w.dna[,names(yes.act)])) / sum(rowSums(w.dna))
 
 prop.nvr.act <- rowSums(w.dna[,nvr.act]) / rowSums(w.dna)
 # cbind.data.frame(design.dna, inactive = prop.nvr.act) %>% 
@@ -545,7 +540,7 @@ transient.plot <- tibble(transient_rich = terr.rich, distance = design.dna$dista
   annotation_logticks(sides = "l", size = 1) +
   labs(x = "Reservoir distance (m)",
        y = "Inactive soil taxa in reservoir") +
-  annotate("text", x = 350, y = max(terr.rich), hjust = 1, vjust = 1, size = 5,
+  annotate("text", x = 350, y = max(terr.rich) + 200, hjust = 1, vjust = 0, size = 5,
            label = paste0("r^2== ",T1.R2), parse = T)  +
   ggsave("figures/transients.pdf")
 transient.plot
@@ -960,5 +955,136 @@ plot_grid(p1, NULL, p2, NULL, p3,
           rel_heights = c(1, -.15, 1, -.15, 1), align = "hv", 
           ncol = 1, labels = c("a", "NULL", "b", "NULL", "c")) +
   ggsave("figures/functions.pdf")
+```
+
+
+```{r}
+
+
+# identify otus in soil samples and lake samples
+in.soil <- OTUs[, which(colSums(OTUs[c(1:3),]) > 0 )]
+
+# isolate just the rna water samples and convert to presence-absence
+in.lake.rna <- OTUs[which(design$molecule == "RNA" & design$type == "water"), ]
+in.lake.rna.pa <- (in.lake.rna > 0) * 1
+
+threshlist <- c(.3, .4, .5, .6, .7, .8, .9)
+df.plot <- data.frame()
+for(thresh in threshlist){
+  # define the 'core' taxa as otus present in 50% of samples
+in.lake.core <- w.dna[, which((colSums(in.lake.rna.pa) / nrow(in.lake.rna.pa)) >= thresh)]
+
+# of the core, how many are also in the soil samples?
+in.lake.core.from.soils <- in.lake.core[, intersect(colnames(in.lake.core), colnames(in.soil))]
+
+# of the core which are not in the soil samples
+in.lake.core.not.soils <- in.lake.core[, setdiff(colnames(in.lake.core), colnames(in.soil))]
+
+# Find the relative abundance of the core taxa and prepare data frame to plot
+in.lake.core.from.soils.REL <- in.lake.core.from.soils / rowSums(w.dna)
+
+in.soil.to.plot <- as.data.frame(in.lake.core.from.soils.REL) %>% 
+  rownames_to_column("sample_ID") %>% 
+  gather(otu_id, rel_abundance, -sample_ID) %>% 
+  left_join(rownames_to_column(design.dna, "sample_ID")) %>% 
+  add_column(found = "soils")
+
+in.lake.core.not.soils.REL <- in.lake.core.not.soils / rowSums(w.dna)
+
+in.lake.to.plot <- as.data.frame(in.lake.core.not.soils.REL) %>% 
+  rownames_to_column("sample_ID") %>% 
+  gather(otu_id, rel_abundance, -sample_ID) %>% 
+  left_join(rownames_to_column(design.dna, "sample_ID")) %>% 
+  add_column(found = "lake")
+
+# model distance effect on rel abundance to get slope and pval
+soil.core.mods <- apply(in.lake.core.from.soils.REL, MARGIN = 2, 
+    FUN = function(x) summary(lm(x ~ design.dna$distance))$coefficients[2,c(1,4)])
+rownames(soil.core.mods) <- c("slope", "pval")
+
+# classify otus as significantly increasing or decreasing along reservoir
+soil.core.decreasing <- as.data.frame(t(soil.core.mods)) %>% 
+  rownames_to_column("OTU") %>% 
+  filter(slope < 0) %>%   # rel abund decreases toward dam
+  left_join(OTU.tax)
+soil.core.increasing <- as.data.frame(t(soil.core.mods)) %>% 
+  rownames_to_column("OTU") %>% 
+  filter(slope > 0) %>%   # rel abund increases toward dam
+  left_join(OTU.tax)
+
+nonsoil.core.mods <- apply(in.lake.core.not.soils.REL, MARGIN = 2, 
+    FUN = function(x) summary(lm(x ~ design.dna$distance))$coefficients[2,c(1,4)])
+rownames(nonsoil.core.mods) <- c("slope", "pval")
+nonsoil.core.decreasing <- as.data.frame(t(nonsoil.core.mods)) %>% 
+  rownames_to_column("OTU") %>% 
+  filter(slope < 0) %>%   # rel abund decreases toward dam
+  left_join(OTU.tax)
+nonsoil.core.increasing <- as.data.frame(t(nonsoil.core.mods)) %>% 
+  rownames_to_column("OTU") %>% 
+  filter(slope > 0) %>%   # rel abund increases toward dam
+  left_join(OTU.tax)
+
+df1 <- as.data.frame(OTUsREL[,nonsoil.core.increasing$OTU]) %>% 
+  rownames_to_column("sampleID") %>% 
+  left_join(rownames_to_column(design, "sampleID")) %>% 
+  gather(OTU, rel_abund, -station, -molecule, -type, -distance, -sampleID) %>% 
+  filter(molecule == "DNA") %>% left_join(OTU.tax) %>% 
+  mutate(soils = "Absent from soils", change = "Increasing")
+n1 <- length(unique(df1$OTU))
+
+df2 <- as.data.frame(OTUsREL[,soil.core.increasing$OTU]) %>% 
+  rownames_to_column("sampleID") %>% 
+  left_join(rownames_to_column(design, "sampleID")) %>% 
+  gather(OTU, rel_abund, -station, -molecule, -type, -distance, -sampleID) %>% 
+  filter(molecule == "DNA") %>% left_join(OTU.tax) %>% 
+  mutate(soils = "Present in soils", change = "Increasing")
+n2 <- length(unique(df2$OTU))
+
+df3 <- as.data.frame(OTUsREL[,soil.core.decreasing$OTU]) %>% 
+  rownames_to_column("sampleID") %>% 
+  left_join(rownames_to_column(design, "sampleID")) %>% 
+  gather(OTU, rel_abund, -station, -molecule, -type, -distance, -sampleID) %>% 
+  filter(molecule == "DNA") %>% left_join(OTU.tax) %>% 
+  mutate(soils = "Present in soils", change = "Decreasing")
+n3 <- length(unique(df3$OTU))
+
+df4 <- as.data.frame(OTUsREL[,nonsoil.core.decreasing$OTU]) %>% 
+  rownames_to_column("sampleID") %>% 
+  left_join(rownames_to_column(design, "sampleID")) %>% 
+  gather(OTU, rel_abund, -station, -molecule, -type, -distance, -sampleID) %>% 
+  filter(molecule == "DNA") %>% left_join(OTU.tax) %>% 
+  mutate(soils = "Absent from soils", change = "Decreasing")
+n4 <- length(unique(df4$OTU))
+
+
+df.plot <- as_tibble(rbind.data.frame(df1, df2, df3, df4)) %>% 
+  mutate(thresh = thresh) %>% filter(type == "water") %>% 
+  bind_rows(df.plot)
+
+}
+
+taxon_fate.plot <- df.plot %>% mutate(rel_abund = ifelse(rel_abund == 0, 1e-6, rel_abund)) %>% 
+  filter(soils == "Present in soils") %>% 
+  #mutate(change = ifelse(change == "Increasing", 
+  #                       paste0("Increasing (n = ", n2,")"),
+  #                       paste0("Decreasing (n = ", n3,")"))) %>% 
+  ggplot(aes(x = distance, y = rel_abund, group = OTU)) + 
+  #geom_jitter(alpha = 0.15) + 
+  geom_line(stat = "smooth", alpha = 0.3, size = .5,
+            method = "loess", span = .7, se = FALSE) +
+  scale_y_log10(labels = scales::scientific) +
+  scale_x_continuous(limits = c(0,380)) +
+  facet_wrap(~thresh) +
+  #theme(legend.position = "none") +
+  #guides(color = guide_legend(ncol = 1)) +
+  labs(x = "Reservoir distance (m)",
+       y = "Active relative abundance") +
+  # annotate("text", x = 365, y = 1e-1, size = 5, hjust = 1, vjust = 1, angle = 90,
+  #          label = "Maintained") +
+  # annotate("text", x = 365, y = 1e-5, size = 5, hjust = 0.5, vjust = 1, angle = 90,
+  #          label = "Decaying") +
+  ggsave("figures/taxa_origins_threshold.pdf", width = 8, height = 6, units = "in")
+taxon_fate.plot
+
 ```
 

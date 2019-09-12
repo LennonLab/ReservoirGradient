@@ -125,7 +125,7 @@ Lennon}
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{10 July, 2019}
+    \date{24 August, 2019}
 
 \usepackage{array}
 \usepackage{graphics}
@@ -146,17 +146,17 @@ some other functions.
 \KeywordTok{library}\NormalTok{(}\StringTok{"grid"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{)   }
 \KeywordTok{library}\NormalTok{(}\StringTok{"vegan"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"xtable"}\NormalTok{)}
+\CommentTok{#library("xtable")}
 \KeywordTok{library}\NormalTok{(}\StringTok{"viridis"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"cowplot"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"adespatial"}\NormalTok{)}
+\CommentTok{#library("adespatial")}
 \KeywordTok{library}\NormalTok{(}\StringTok{"ggrepel"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"gganimate"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"maps"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"rgdal"}\NormalTok{)}
+\CommentTok{#library("gganimate")}
+\CommentTok{#library("maps")}
+\CommentTok{#library("rgdal")}
 \KeywordTok{library}\NormalTok{(}\StringTok{"iNEXT"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"officer"}\NormalTok{)}
-\KeywordTok{library}\NormalTok{(}\StringTok{"flextable"}\NormalTok{) }\CommentTok{#must have gdtools installed also}
+\CommentTok{#library("officer")}
+\CommentTok{#library("flextable") #must have gdtools installed also}
 \KeywordTok{library}\NormalTok{(}\StringTok{"broom"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"ggpmisc"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"pander"}\NormalTok{)}
@@ -295,7 +295,7 @@ reservoir.
 \StringTok{  }\KeywordTok{gather}\NormalTok{(variable, value, }\OperatorTok{-}\NormalTok{distance) }\OperatorTok{%>%}\StringTok{ }
 \StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ value)) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{facet_grid}\NormalTok{(variable }\OperatorTok{~}\NormalTok{., }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{, }\DataTypeTok{switch =} \StringTok{"y"}\NormalTok{, }
              \DataTypeTok{labeller =} \KeywordTok{as_labeller}\NormalTok{(facet.labs)) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{strip.background =} \KeywordTok{element_blank}\NormalTok{(), }
@@ -303,7 +303,8 @@ reservoir.
         \DataTypeTok{strip.placement =} \StringTok{"outside"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
        \DataTypeTok{y =} \StringTok{""}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{()}
+\StringTok{  }\KeywordTok{scale_y_continuous}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/env_vars.pdf"}\NormalTok{, }\DataTypeTok{height =} \DecValTok{3}\OperatorTok{/}\DecValTok{4}\OperatorTok{*}\DecValTok{4}\OperatorTok{*}\DecValTok{3}\NormalTok{, }\DataTypeTok{width =} \DecValTok{4}\NormalTok{, }\DataTypeTok{units =} \StringTok{"in"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -351,135 +352,11 @@ Chao et al.~in the iNEXT package.
   \KeywordTok{singleton.Est}\NormalTok{(x, }\StringTok{"abundance"}\NormalTok{)}\OperatorTok{$}\NormalTok{corrected.data}
 \NormalTok{\}}
 
-\NormalTok{otus.for.inext <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(otus.for.inext, }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, singleton.apply)}
-\CommentTok{# divestim <- estimateD(otus.for.inext, datatype = "abundance", }
+\CommentTok{# otus.for.inext <- apply(otus.for.inext, MARGIN = 2, singleton.apply)}
+\CommentTok{# divestim <- estimateD(otus.for.inext, datatype = "abundance",}
 \CommentTok{#           base = "size", conf = 0.95)}
-\CommentTok{# divestim <- iNEXT(otus.for.inext, datatype = "abundance", }
-\CommentTok{#                   size =  min(coverage), nboot = 999)}
-\CommentTok{# divestim$iNextEst}
 \CommentTok{# saveRDS(divestim, file = "intermediate-data/inext-output.rda")}
-\NormalTok{divestim <-}\StringTok{ }\KeywordTok{read_rds}\NormalTok{(}\StringTok{"intermediate-data/inext-output.rda"}\NormalTok{)}
-\NormalTok{divestim}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-##         site     m       method order    SC       qD   qD.LCL   qD.UCL
-## 1   RGSoil01 37027 interpolated     0 0.955 3889.214 3867.259 3911.169
-## 2   RGSoil01 37027 interpolated     1 0.955  752.963  746.212  759.715
-## 3   RGSoil01 37027 interpolated     2 0.955  182.356  179.896  184.817
-## 4   RGSoil02 37027 interpolated     0 0.945 4392.817 4367.251 4418.382
-## 5   RGSoil02 37027 interpolated     1 0.945  666.077  660.260  671.895
-## 6   RGSoil02 37027 interpolated     2 0.945  134.658  132.742  136.574
-## 7   RGSoil03 37027 interpolated     0 0.950 4191.294 4161.602 4220.987
-## 8   RGSoil03 37027 interpolated     1 0.950  773.790  766.732  780.848
-## 9   RGSoil03 37027 interpolated     2 0.950  179.353  176.344  182.363
-## 10     RGD01 37027     observed     0 0.999  350.000  341.907  358.093
-## 11     RGD01 37027     observed     1 0.999   60.336   59.421   61.251
-## 12     RGD01 37027     observed     2 0.999   30.661   30.111   31.211
-## 13     RGc01 37027 interpolated     0 0.996  285.774  277.158  294.391
-## 14     RGc01 37027 interpolated     1 0.996   21.184   21.034   21.335
-## 15     RGc01 37027 interpolated     2 0.996    9.764    9.671    9.858
-## 16     RGD02 37027 interpolated     0 0.996  535.631  521.557  549.704
-## 17     RGD02 37027 interpolated     1 0.996   70.802   69.799   71.805
-## 18     RGD02 37027 interpolated     2 0.996   35.622   35.059   36.185
-## 19     RGc02 37027 interpolated     0 0.996  276.963  269.657  284.269
-## 20     RGc02 37027 interpolated     1 0.996   31.118   30.905   31.332
-## 21     RGc02 37027 interpolated     2 0.996   16.072   15.940   16.204
-## 22     RGD03 37027 interpolated     0 0.997  576.480  562.427  590.532
-## 23     RGD03 37027 interpolated     1 0.997   67.500   66.450   68.550
-## 24     RGD03 37027 interpolated     2 0.997   31.838   31.267   32.409
-## 25     RGc03 37027 interpolated     0 0.997  166.654  160.265  173.044
-## 26     RGc03 37027 interpolated     1 0.997    7.545    7.497    7.593
-## 27     RGc03 37027 interpolated     2 0.997    4.194    4.165    4.223
-## 28     RGD04 37027 interpolated     0 0.996  536.871  519.687  554.055
-## 29     RGD04 37027 interpolated     1 0.996   71.051   70.051   72.052
-## 30     RGD04 37027 interpolated     2 0.996   35.457   34.821   36.092
-## 31     RGc04 37027 interpolated     0 0.997  392.580  385.414  399.746
-## 32     RGc04 37027 interpolated     1 0.997    2.241    2.218    2.264
-## 33     RGc04 37027 interpolated     2 0.997    1.336    1.331    1.341
-## 34     RGc05 37027 interpolated     0 0.998  212.420  204.739  220.101
-## 35     RGc05 37027 interpolated     1 0.998    4.881    4.840    4.923
-## 36     RGc05 37027 interpolated     2 0.998    3.967    3.950    3.984
-## 37     RGD06 37027 interpolated     0 0.992  720.373  709.705  731.041
-## 38     RGD06 37027 interpolated     1 0.992   61.376   60.858   61.894
-## 39     RGD06 37027 interpolated     2 0.992   26.153   25.921   26.386
-## 40     RGD07 37027 interpolated     0 0.991 1016.407  994.401 1038.413
-## 41     RGD07 37027 interpolated     1 0.991   85.475   83.864   87.085
-## 42     RGD07 37027 interpolated     2 0.991   34.786   34.100   35.471
-## 43     RGc07 37027 interpolated     0 0.997  171.638  163.075  180.202
-## 44     RGc07 37027 interpolated     1 0.997    4.496    4.467    4.524
-## 45     RGc07 37027 interpolated     2 0.997    3.192    3.172    3.213
-## 46     RGD08 37027 interpolated     0 0.992  835.316  824.174  846.458
-## 47     RGD08 37027 interpolated     1 0.992   71.572   70.913   72.230
-## 48     RGD08 37027 interpolated     2 0.992   29.885   29.555   30.216
-## 49     RGc08 37027 interpolated     0 0.998  165.011  160.172  169.850
-## 50     RGc08 37027 interpolated     1 0.998   18.257   18.159   18.355
-## 51     RGc08 37027 interpolated     2 0.998   10.562   10.482   10.642
-## 52     RGD09 37027 interpolated     0 0.993  962.514  942.906  982.123
-## 53     RGD09 37027 interpolated     1 0.993  102.957  101.246  104.668
-## 54     RGD09 37027 interpolated     2 0.993   40.437   39.617   41.256
-## 55     RGc09 37027 interpolated     0 0.997  264.910  257.723  272.096
-## 56     RGc09 37027 interpolated     1 0.997    5.931    5.883    5.979
-## 57     RGc09 37027 interpolated     2 0.997    3.899    3.879    3.920
-## 58     RGD10 37027 interpolated     0 0.992  979.243  968.583  989.904
-## 59     RGD10 37027 interpolated     1 0.992  115.134  114.131  116.138
-## 60     RGD10 37027 interpolated     2 0.992   50.536   49.946   51.126
-## 61     RGc10 37027 interpolated     0 0.993  728.724  712.946  744.503
-## 62     RGc10 37027 interpolated     1 0.993   78.838   77.746   79.930
-## 63     RGc10 37027 interpolated     2 0.993   29.012   28.430   29.595
-## 64     RGD11 37027 interpolated     0 0.990 1423.107 1411.926 1434.289
-## 65     RGD11 37027 interpolated     1 0.990  161.982  160.650  163.315
-## 66     RGD11 37027 interpolated     2 0.990   65.095   64.432   65.759
-## 67     RGc11 37027 interpolated     0 0.996  307.585  299.254  315.916
-## 68     RGc11 37027 interpolated     1 0.996   36.292   36.060   36.524
-## 69     RGc11 37027 interpolated     2 0.996   22.636   22.483   22.788
-## 70     RGD12 37027 interpolated     0 0.991 1720.686 1709.731 1731.640
-## 71     RGD12 37027 interpolated     1 0.991  252.525  250.280  254.770
-## 72     RGD12 37027 interpolated     2 0.991   85.267   84.458   86.077
-## 73     RGc12 37027 interpolated     0 0.995  372.791  363.552  382.029
-## 74     RGc12 37027 interpolated     1 0.995   24.840   24.682   24.997
-## 75     RGc12 37027 interpolated     2 0.995   17.702   17.624   17.780
-## 76     RGD13 37027 interpolated     0 0.988  930.870  916.712  945.028
-## 77     RGD13 37027 interpolated     1 0.988   56.414   55.942   56.885
-## 78     RGD13 37027 interpolated     2 0.988   23.056   22.824   23.287
-## 79     RGc13 37027 interpolated     0 0.997  269.903  263.231  276.575
-## 80     RGc13 37027 interpolated     1 0.997   15.722   15.619   15.825
-## 81     RGc13 37027 interpolated     2 0.997   10.745   10.689   10.800
-## 82     RGD14 37027 interpolated     0 0.986 1034.420 1017.730 1051.109
-## 83     RGD14 37027 interpolated     1 0.986   73.078   72.401   73.755
-## 84     RGD14 37027 interpolated     2 0.986   31.228   30.863   31.592
-## 85     RGc14 37027 interpolated     0 0.996  274.400  266.768  282.033
-## 86     RGc14 37027 interpolated     1 0.996   24.518   24.418   24.619
-## 87     RGc14 37027 interpolated     2 0.996   18.355   18.270   18.441
-## 88     RGD15 37027 interpolated     0 0.987 1793.670 1777.615 1809.724
-## 89     RGD15 37027 interpolated     1 0.987  203.796  201.493  206.100
-## 90     RGD15 37027 interpolated     2 0.987   70.240   69.353   71.127
-## 91     RGc15 37027 interpolated     0 0.997  234.673  225.851  243.495
-## 92     RGc15 37027 interpolated     1 0.997   25.655   25.508   25.802
-## 93     RGc15 37027 interpolated     2 0.997   18.394   18.269   18.519
-## 94     RGD16 37027 interpolated     0 0.983 1539.874 1520.207 1559.540
-## 95     RGD16 37027 interpolated     1 0.983   39.704   39.088   40.320
-## 96     RGD16 37027 interpolated     2 0.983    9.644    9.523    9.765
-## 97     RGc16 37027 interpolated     0 0.998  122.606  116.878  128.335
-## 98     RGc16 37027 interpolated     1 0.998    2.358    2.345    2.371
-## 99     RGc16 37027 interpolated     2 0.998    1.747    1.740    1.755
-## 100    RGD17 37027 interpolated     0 0.993 1190.721 1176.273 1205.170
-## 101    RGD17 37027 interpolated     1 0.993  126.164  124.455  127.873
-## 102    RGD17 37027 interpolated     2 0.993   44.699   44.030   45.368
-## 103    RGc17 37027 interpolated     0 0.997  380.131  373.375  386.886
-## 104    RGc17 37027 interpolated     1 0.997   12.276   12.171   12.381
-## 105    RGc17 37027 interpolated     2 0.997    6.641    6.604    6.679
-## 106    RGD18 37027 interpolated     0 0.986 2304.240 2290.738 2317.742
-## 107    RGD18 37027 interpolated     1 0.986  296.102  292.933  299.270
-## 108    RGD18 37027 interpolated     2 0.986   76.031   75.068   76.993
-## 109    RGc18 37027 interpolated     0 0.996  220.000  212.572  227.429
-## 110    RGc18 37027 interpolated     1 0.996    4.727    4.704    4.750
-## 111    RGc18 37027 interpolated     2 0.996    3.665    3.654    3.676
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
+\NormalTok{divestim <-}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"intermediate-data/inext-output.rda"}\NormalTok{)}
 \NormalTok{divestim.df <-}\StringTok{ }\NormalTok{divestim }\OperatorTok{%>%}\StringTok{ }
 \StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{habitat =} \KeywordTok{str_to_title}\NormalTok{(design[}\KeywordTok{as.character}\NormalTok{(site),}\StringTok{"type"}\NormalTok{]))}
 \end{Highlighting}
@@ -490,9 +367,9 @@ samples relative to the lake samples.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# divestim.df %>% }
-\CommentTok{#   ggplot(aes(x = x, y = y, }
-\CommentTok{#              ymin = y.lwr, ymax = y.upr, }
+\CommentTok{# divestim.df %>%}
+\CommentTok{#   ggplot(aes(x = x, y = y,}
+\CommentTok{#              ymin = y.lwr, ymax = y.upr,}
 \CommentTok{#              color = habitat, fill = habitat, group = site)) +}
 \CommentTok{#   geom_ribbon(data=subset(divestim.df, method == "extrapolated"), alpha = 0.3) +}
 \CommentTok{#   geom_line(data=subset(divestim.df, method == "interpolated"), size = 1, alpha = .8) +}
@@ -501,8 +378,8 @@ samples relative to the lake samples.
 \CommentTok{#   labs(x = "Sample size", y = "Estimated richness") +}
 \CommentTok{#   theme(legend.position = "none") +}
 \CommentTok{#   #theme(legend.position =  c(.88,.5)) +}
-\CommentTok{#   annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) + }
-\CommentTok{#   annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) + }
+\CommentTok{#   annotate(label = "Soil", size = 6, geom = "text", x = 85000, y = 5000) +}
+\CommentTok{#   annotate(label = "Water", size = 6, geom = "text", x = 85000, y = 1500) +}
 \CommentTok{#   scale_color_grey(end = .7) +}
 \CommentTok{#   scale_fill_grey(end = .7)}
 \end{Highlighting}
@@ -1042,10 +919,10 @@ aquatic transect.
 \StringTok{  }\KeywordTok{coord_fixed}\NormalTok{(}\DataTypeTok{ratio =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 1 ("}\NormalTok{, explainvars[}\DecValTok{1}\NormalTok{],}\StringTok{"%)"}\NormalTok{),}
        \DataTypeTok{y =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"PCoA 2 ("}\NormalTok{, explainvars[}\DecValTok{2}\NormalTok{],}\StringTok{"%)"}\NormalTok{)) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \FloatTok{.2}\NormalTok{, }\DataTypeTok{y =} \DecValTok{0}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Active"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \FloatTok{-.25}\NormalTok{, }\DataTypeTok{y =} \FloatTok{-.3}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Total"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\DataTypeTok{geom =} \StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \FloatTok{.3}\NormalTok{, }\DataTypeTok{y =} \FloatTok{-.4}\NormalTok{, }\DataTypeTok{label =} \StringTok{"Soils"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\CommentTok{# theme(legend.position = "none") +}
+\StringTok{  }\CommentTok{# annotate(geom = "text", x = .2, y = 0, label = "Active", size = 5) +}
+\StringTok{  }\CommentTok{# annotate(geom = "text", x = -.25, y = -.3, label = "Total", size = 5) + }
+\StringTok{  }\CommentTok{# annotate(geom = "text", x = .3, y = -.4, label = "Soils", size = 5) +}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/pcoa.pdf"}\NormalTok{)}
 \NormalTok{pcoa.fig}
 \end{Highlighting}
@@ -1094,7 +971,7 @@ classify OTUs as:\\
 \NormalTok{yes.act <-}\StringTok{ }\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(lake.and.soil.act) }\OperatorTok{!=}\StringTok{ }\DecValTok{0}\NormalTok{)}
 
 \CommentTok{# how many otus are active relative to the total number of otus }
-\KeywordTok{length}\NormalTok{(nvr.act) }\OperatorTok{/}\StringTok{ }\KeywordTok{ncol}\NormalTok{(lake.and.soil.total)}
+\KeywordTok{length}\NormalTok{(nvr.act) }\OperatorTok{/}\StringTok{ }\KeywordTok{ncol}\NormalTok{(lake.and.soil.total) }\CommentTok{# 88% of soil-derived bac never active}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1104,12 +981,12 @@ classify OTUs as:\\
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{length}\NormalTok{(yes.act) }\OperatorTok{/}\StringTok{ }\KeywordTok{ncol}\NormalTok{(lake.and.soil.total)}
+\KeywordTok{length}\NormalTok{(yes.act) }\OperatorTok{/}\StringTok{ }\KeywordTok{ncol}\NormalTok{(soil.total) }\CommentTok{# 8% of all soil taxa were active in lake}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.1174463
+## [1] 0.08102603
 \end{verbatim}
 
 \begin{Shaded}
@@ -1145,43 +1022,13 @@ classify OTUs as:\\
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# of taxa who became active, what fraction of the active community did they represent?}
-\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.rna[,}\KeywordTok{names}\NormalTok{(nvr.act)]))}
+\CommentTok{# of taxa who became active, what fraction of the dna community did they represent?}
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.dna[,}\KeywordTok{names}\NormalTok{(yes.act)])) }\OperatorTok{/}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.dna))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.rna[,}\KeywordTok{names}\NormalTok{(yes.act)]))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] 513837
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.rna[,}\KeywordTok{names}\NormalTok{(nvr.act)])) }\OperatorTok{/}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.rna))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] 0
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.rna[,}\KeywordTok{names}\NormalTok{(yes.act)])) }\OperatorTok{/}\StringTok{ }\KeywordTok{sum}\NormalTok{(}\KeywordTok{rowSums}\NormalTok{(w.rna))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## [1] 0.98993
+## [1] 0.9545624
 \end{verbatim}
 
 \begin{Shaded}
@@ -1312,7 +1159,7 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \StringTok{  }\KeywordTok{annotation_logticks}\NormalTok{(}\DataTypeTok{sides =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{size =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
        \DataTypeTok{y =} \StringTok{"Inactive soil taxa in reservoir"}\NormalTok{) }\OperatorTok{+}
-\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{350}\NormalTok{, }\DataTypeTok{y =} \KeywordTok{max}\NormalTok{(terr.rich), }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
+\StringTok{  }\KeywordTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\DataTypeTok{x =} \DecValTok{350}\NormalTok{, }\DataTypeTok{y =} \KeywordTok{max}\NormalTok{(terr.rich) }\OperatorTok{+}\StringTok{ }\DecValTok{200}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{vjust =} \DecValTok{0}\NormalTok{, }\DataTypeTok{size =} \DecValTok{5}\NormalTok{,}
            \DataTypeTok{label =} \KeywordTok{paste0}\NormalTok{(}\StringTok{"r^2== "}\NormalTok{,T1.R2), }\DataTypeTok{parse =}\NormalTok{ T)  }\OperatorTok{+}
 \StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/transients.pdf"}\NormalTok{)}
 \NormalTok{transient.plot}
@@ -3221,6 +3068,311 @@ structure}\label{relation-of-ecosystem-functions-and-community-structure}}
 \end{Shaded}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-10-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# identify otus in soil samples and lake samples}
+\NormalTok{in.soil <-}\StringTok{ }\NormalTok{OTUs[, }\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs[}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{),]) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{ )]}
+
+\CommentTok{# isolate just the rna water samples and convert to presence-absence}
+\NormalTok{in.lake.rna <-}\StringTok{ }\NormalTok{OTUs[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "RNA"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{), ]}
+\NormalTok{in.lake.rna.pa <-}\StringTok{ }\NormalTok{(in.lake.rna }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{*}\StringTok{ }\DecValTok{1}
+
+\NormalTok{threshlist <-}\StringTok{ }\KeywordTok{c}\NormalTok{(.}\DecValTok{3}\NormalTok{, }\FloatTok{.4}\NormalTok{, }\FloatTok{.5}\NormalTok{, }\FloatTok{.6}\NormalTok{, }\FloatTok{.7}\NormalTok{, }\FloatTok{.8}\NormalTok{, }\FloatTok{.9}\NormalTok{)}
+\NormalTok{df.plot <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{()}
+\ControlFlowTok{for}\NormalTok{(thresh }\ControlFlowTok{in}\NormalTok{ threshlist)\{}
+  \CommentTok{# define the 'core' taxa as otus present in 50% of samples}
+\NormalTok{in.lake.core <-}\StringTok{ }\NormalTok{w.dna[, }\KeywordTok{which}\NormalTok{((}\KeywordTok{colSums}\NormalTok{(in.lake.rna.pa) }\OperatorTok{/}\StringTok{ }\KeywordTok{nrow}\NormalTok{(in.lake.rna.pa)) }\OperatorTok{>=}\StringTok{ }\NormalTok{thresh)]}
+
+\CommentTok{# of the core, how many are also in the soil samples?}
+\NormalTok{in.lake.core.from.soils <-}\StringTok{ }\NormalTok{in.lake.core[, }\KeywordTok{intersect}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(in.lake.core), }\KeywordTok{colnames}\NormalTok{(in.soil))]}
+
+\CommentTok{# of the core which are not in the soil samples}
+\NormalTok{in.lake.core.not.soils <-}\StringTok{ }\NormalTok{in.lake.core[, }\KeywordTok{setdiff}\NormalTok{(}\KeywordTok{colnames}\NormalTok{(in.lake.core), }\KeywordTok{colnames}\NormalTok{(in.soil))]}
+
+\CommentTok{# Find the relative abundance of the core taxa and prepare data frame to plot}
+\NormalTok{in.lake.core.from.soils.REL <-}\StringTok{ }\NormalTok{in.lake.core.from.soils }\OperatorTok{/}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(w.dna)}
+
+\NormalTok{in.soil.to.plot <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(in.lake.core.from.soils.REL) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"sample_ID"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(otu_id, rel_abundance, }\OperatorTok{-}\NormalTok{sample_ID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design.dna, }\StringTok{"sample_ID"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{add_column}\NormalTok{(}\DataTypeTok{found =} \StringTok{"soils"}\NormalTok{)}
+
+\NormalTok{in.lake.core.not.soils.REL <-}\StringTok{ }\NormalTok{in.lake.core.not.soils }\OperatorTok{/}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(w.dna)}
+
+\NormalTok{in.lake.to.plot <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(in.lake.core.not.soils.REL) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"sample_ID"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(otu_id, rel_abundance, }\OperatorTok{-}\NormalTok{sample_ID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design.dna, }\StringTok{"sample_ID"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{add_column}\NormalTok{(}\DataTypeTok{found =} \StringTok{"lake"}\NormalTok{)}
+
+\CommentTok{# model distance effect on rel abundance to get slope and pval}
+\NormalTok{soil.core.mods <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(in.lake.core.from.soils.REL, }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, }
+    \DataTypeTok{FUN =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(x }\OperatorTok{~}\StringTok{ }\NormalTok{design.dna}\OperatorTok{$}\NormalTok{distance))}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{4}\NormalTok{)])}
+\KeywordTok{rownames}\NormalTok{(soil.core.mods) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"slope"}\NormalTok{, }\StringTok{"pval"}\NormalTok{)}
+
+\CommentTok{# classify otus as significantly increasing or decreasing along reservoir}
+\NormalTok{soil.core.decreasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(soil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
+\NormalTok{soil.core.increasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(soil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
+
+\NormalTok{nonsoil.core.mods <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(in.lake.core.not.soils.REL, }\DataTypeTok{MARGIN =} \DecValTok{2}\NormalTok{, }
+    \DataTypeTok{FUN =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{summary}\NormalTok{(}\KeywordTok{lm}\NormalTok{(x }\OperatorTok{~}\StringTok{ }\NormalTok{design.dna}\OperatorTok{$}\NormalTok{distance))}\OperatorTok{$}\NormalTok{coefficients[}\DecValTok{2}\NormalTok{,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{4}\NormalTok{)])}
+\KeywordTok{rownames}\NormalTok{(nonsoil.core.mods) <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"slope"}\NormalTok{, }\StringTok{"pval"}\NormalTok{)}
+\NormalTok{nonsoil.core.decreasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(nonsoil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{<}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund decreases toward dam}
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
+\NormalTok{nonsoil.core.increasing <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{t}\NormalTok{(nonsoil.core.mods)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"OTU"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(slope }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}\StringTok{   }\CommentTok{# rel abund increases toward dam}
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(OTU.tax)}
+
+\NormalTok{df1 <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(OTUsREL[,nonsoil.core.increasing}\OperatorTok{$}\NormalTok{OTU]) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"sampleID"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"sampleID"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(OTU, rel_abund, }\OperatorTok{-}\NormalTok{station, }\OperatorTok{-}\NormalTok{molecule, }\OperatorTok{-}\NormalTok{type, }\OperatorTok{-}\NormalTok{distance, }\OperatorTok{-}\NormalTok{sampleID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(OTU.tax) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{soils =} \StringTok{"Absent from soils"}\NormalTok{, }\DataTypeTok{change =} \StringTok{"Increasing"}\NormalTok{)}
+\NormalTok{n1 <-}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(df1}\OperatorTok{$}\NormalTok{OTU))}
+
+\NormalTok{df2 <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(OTUsREL[,soil.core.increasing}\OperatorTok{$}\NormalTok{OTU]) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"sampleID"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"sampleID"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(OTU, rel_abund, }\OperatorTok{-}\NormalTok{station, }\OperatorTok{-}\NormalTok{molecule, }\OperatorTok{-}\NormalTok{type, }\OperatorTok{-}\NormalTok{distance, }\OperatorTok{-}\NormalTok{sampleID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(OTU.tax) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{soils =} \StringTok{"Present in soils"}\NormalTok{, }\DataTypeTok{change =} \StringTok{"Increasing"}\NormalTok{)}
+\NormalTok{n2 <-}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(df2}\OperatorTok{$}\NormalTok{OTU))}
+
+\NormalTok{df3 <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(OTUsREL[,soil.core.decreasing}\OperatorTok{$}\NormalTok{OTU]) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"sampleID"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"sampleID"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(OTU, rel_abund, }\OperatorTok{-}\NormalTok{station, }\OperatorTok{-}\NormalTok{molecule, }\OperatorTok{-}\NormalTok{type, }\OperatorTok{-}\NormalTok{distance, }\OperatorTok{-}\NormalTok{sampleID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(OTU.tax) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{soils =} \StringTok{"Present in soils"}\NormalTok{, }\DataTypeTok{change =} \StringTok{"Decreasing"}\NormalTok{)}
+\NormalTok{n3 <-}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(df3}\OperatorTok{$}\NormalTok{OTU))}
+
+\NormalTok{df4 <-}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(OTUsREL[,nonsoil.core.decreasing}\OperatorTok{$}\NormalTok{OTU]) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{rownames_to_column}\NormalTok{(}\StringTok{"sampleID"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{left_join}\NormalTok{(}\KeywordTok{rownames_to_column}\NormalTok{(design, }\StringTok{"sampleID"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(OTU, rel_abund, }\OperatorTok{-}\NormalTok{station, }\OperatorTok{-}\NormalTok{molecule, }\OperatorTok{-}\NormalTok{type, }\OperatorTok{-}\NormalTok{distance, }\OperatorTok{-}\NormalTok{sampleID) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(OTU.tax) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{soils =} \StringTok{"Absent from soils"}\NormalTok{, }\DataTypeTok{change =} \StringTok{"Decreasing"}\NormalTok{)}
+\NormalTok{n4 <-}\StringTok{ }\KeywordTok{length}\NormalTok{(}\KeywordTok{unique}\NormalTok{(df4}\OperatorTok{$}\NormalTok{OTU))}
+
+
+\NormalTok{df.plot <-}\StringTok{ }\KeywordTok{as_tibble}\NormalTok{(}\KeywordTok{rbind.data.frame}\NormalTok{(df1, df2, df3, df4)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{thresh =}\NormalTok{ thresh) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(type }\OperatorTok{==}\StringTok{ "water"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{bind_rows}\NormalTok{(df.plot)}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+
+## Warning: Column `OTU` joining character vector and factor, coercing into
+## character vector
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{taxon_fate.plot <-}\StringTok{ }\NormalTok{df.plot }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{rel_abund =} \KeywordTok{ifelse}\NormalTok{(rel_abund }\OperatorTok{==}\StringTok{ }\DecValTok{0}\NormalTok{, }\FloatTok{1e-6}\NormalTok{, rel_abund)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(soils }\OperatorTok{==}\StringTok{ "Present in soils"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\CommentTok{#mutate(change = ifelse(change == "Increasing", }
+\StringTok{  }\CommentTok{#                       paste0("Increasing (n = ", n2,")"),}
+\StringTok{  }\CommentTok{#                       paste0("Decreasing (n = ", n3,")"))) %>% }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ rel_abund, }\DataTypeTok{group =}\NormalTok{ OTU)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_jitter(alpha = 0.15) + }
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"smooth"}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.3}\NormalTok{, }\DataTypeTok{size =} \FloatTok{.5}\NormalTok{,}
+            \DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{span =} \FloatTok{.7}\NormalTok{, }\DataTypeTok{se =} \OtherTok{FALSE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_y_log10}\NormalTok{(}\DataTypeTok{labels =}\NormalTok{ scales}\OperatorTok{::}\NormalTok{scientific) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{380}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{thresh) }\OperatorTok{+}
+\StringTok{  }\CommentTok{#theme(legend.position = "none") +}
+\StringTok{  }\CommentTok{#guides(color = guide_legend(ncol = 1)) +}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Active relative abundance"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\CommentTok{# annotate("text", x = 365, y = 1e-1, size = 5, hjust = 1, vjust = 1, angle = 90,}
+\StringTok{  }\CommentTok{#          label = "Maintained") +}
+\StringTok{  }\CommentTok{# annotate("text", x = 365, y = 1e-5, size = 5, hjust = 0.5, vjust = 1, angle = 90,}
+\StringTok{  }\CommentTok{#          label = "Decaying") +}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/taxa_origins_threshold.pdf"}\NormalTok{, }\DataTypeTok{width =} \DecValTok{8}\NormalTok{, }\DataTypeTok{height =} \DecValTok{6}\NormalTok{, }\DataTypeTok{units =} \StringTok{"in"}\NormalTok{)}
+\NormalTok{taxon_fate.plot}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-11-1} \end{center}
 
 
 \end{document}
