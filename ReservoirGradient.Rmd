@@ -30,21 +30,17 @@ library("png")
 library("grid")
 library("tidyverse")   
 library("vegan")
-#library("xtable")
 library("viridis")
 library("cowplot")
-#library("adespatial")
 library("ggrepel")
-#library("gganimate")
-#library("maps")
-#library("rgdal")
 library("iNEXT")
-#library("officer")
-#library("flextable") #must have gdtools installed also
 library("broom")
 library("ggpmisc")
 library("pander")
 library("lubridate")
+library("betapart")
+library("adespatial")
+library("VennDiagram")
 
 source("bin/mothur_tools.R")
 se <- function(x, ...){sd(x, na.rm = TRUE)/sqrt(length(na.omit(x)))}
@@ -129,8 +125,21 @@ otus.for.inext <-  t(OTUs)
 # Remove OTUs with < 2 occurences across all sites
 OTUs <- OTUs[, which(colSums(OTUs) >= 2)]
 coverage <- rowSums(OTUs)
+
+# Rarify the community, nest RNA in DNA, and reorganize OTU table
 set.seed(47405)
 OTUs <- rrarefy(OTUs, min(coverage))
+OTUs.w.dna <- OTUs[which(design$type == "water" & design$molecule == "DNA"),]
+rowSums((OTUs.w.dna > 1))
+OTUs.w.rna <- OTUs[which(design$type == "water" & design$molecule == "RNA"),]
+rowSums((OTUs.w.rna > 1))
+
+OTUs.w.dna <- OTUs.w.dna + as.matrix(decostand(OTUs.w.rna, method = "pa"))
+rowSums((OTUs.w.dna > 1))
+OTUs <- rbind(OTUs[1:3,],
+              OTUs.w.dna,
+              OTUs.w.rna)
+OTUs <- OTUs[match(rownames(design), rownames(OTUs)),]
 
 # Make Relative Abundance Matrices
 OTUsREL <- decostand(OTUs, method = "total")
@@ -390,6 +399,61 @@ plot_grid(alpha.fig + labs(x = ""), similarity.plot,
 ```
 
 
+## Are the aquatic samples nested subsets of the soil?
+```{r}
+betapart.sor <- beta.pair(decostand(OTUs, method = "pa"), "sorensen")
+
+nest.lake <- as.matrix(betapart.sor$beta.sne)[-c(1:3), 1:3] 
+nest.mean    <- round(apply(nest.lake, 1, mean), 3)
+nest.se      <- round(apply(nest.lake, 1, se), 3)
+UL.nest       <- cbind(design[-c(1:3), ], nest.mean, nest.se)
+
+turn.lake <- as.matrix(betapart.sor$beta.sim)[-c(1:3), 1:3] 
+turn.mean    <- round(apply(turn.lake, 1, mean), 3)
+turn.se      <- round(apply(turn.lake, 1, se), 3)
+UL.turn       <- cbind(design[-c(1:3), ], turn.mean, turn.se)
+
+left_join(UL.nest, UL.turn) %>% 
+  mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
+  ggplot(aes(x = distance, y = turn.mean, shape = molecule)) +
+  geom_smooth(method = "lm", aes(linetype = molecule), color = "black", show.legend = T) + 
+  geom_point(alpha = 0.8, size = 3, show.legend = T) + 
+  labs(y = str_wrap("Percent similarity to soil community", width = 20), 
+       x = "Reservoir distance (m)") + 
+  scale_x_continuous(limits = c(-49,350))
+
+betadivcomp.sor <- beta.div.comp(mat = OTUsREL.log, coef = "S", quant = FALSE, save.abc = FALSE)
+
+rich.lake <- as.matrix(betadivcomp.sor$rich)[-c(1:3), 1:3] 
+rich.se      <- round(apply(rich.lake, 1, se), 3)
+rich.mean    <- round(apply(rich.lake, 1, mean), 3)
+UL.rich       <- cbind(design[-c(1:3), ], rich.mean, rich.se)
+
+repl.lake <- as.matrix(betadivcomp.sor$repl)[-c(1:3), 1:3] 
+repl.mean    <- round(apply(repl.lake, 1, mean), 3)
+repl.se      <- round(apply(repl.lake, 1, se), 3)
+UL.repl       <- cbind(design[-c(1:3), ], repl.mean, repl.se)
+
+UL_betapartitions <- left_join(UL.nest, UL.turn) %>% left_join(UL.rich) %>% left_join(UL.repl) %>% 
+  gather(nest.se, turn.se, rich.se, repl.se, key = "partition", value = "se") %>% 
+  gather(nest.mean, turn.mean, rich.mean, repl.mean, key = "partition", value = "beta")
+  
+UL_betapartitions %>% 
+  mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
+  mutate(family = ifelse(partition %in% c("nest.mean", "turn.mean"), "Baselga", "Podani")) %>% 
+  ggplot(aes(x = distance, y = beta, shape = molecule, color = molecule, fill = molecule)) +
+  geom_smooth(method = "lm", aes(linetype = molecule), color = "black", show.legend = T) + 
+  geom_point(alpha = 0.8, size = 3, show.legend = T) + 
+  facet_wrap(family~partition) +
+  labs(y = str_wrap("Beta diversity partition (Sorensen)", width = 20), 
+       x = "Reservoir distance (m)") + 
+  scale_x_continuous(limits = c(-49,350)) +
+  ggsave("figures/nestedness.pdf", width = 8, height = 8)
+
+
+```
+
+
 ## How does community structure change along the gradient?
 First, we'll just get an overview of how the communities look along the aquatic transect. 
 ```{r ordination, fig.asp=1}
@@ -555,6 +619,29 @@ transient.plot
 #           labels = "auto", ncol = 2) +
 #   ggsave("figures/large_panel.pdf", width = 12, height = 8)
 ```
+
+
+# See which taxa are shared between habitats
+```{r}
+OTUs.PA <- decostand(OTUsREL, method = "pa")
+soil <- names(which(colSums(OTUs.PA[design$type == "soil",]) > 0))
+water.dna <- names(which(colSums(OTUs.PA[design$type == "water" & design$molecule == "DNA",]) > 0))
+water.rna <- names(which(colSums(OTUs.PA[design$type == "water" & design$molecule == "RNA",]) > 0))
+
+sum(water.rna %in% water.dna)
+
+nsoil <- length(soil)
+nwdna <- length(water.dna)
+nwrna <- length(water.rna)
+otus.by.habitat <- list("Soil" = soil, "Total Aquatic" = water.dna, "Active Aquatic" = water.rna)
+
+venn.diagram(otus.by.habitat, "figures/venn_by_habitat.png", 
+             imagetype = "png", 
+             fontfamily = "sans", 
+             cat.fontfamily = "sans",
+             alpha = .25)
+```
+
 
 # What is the fate of soil-derived taxa in the reservoir? 
 So, we observe that most soil-derived taxa appear to decay once they enter the reservoir. Do any soil-derived taxa persist in the active bacterial community of the reservoir and do they rise to high relative abundances?
