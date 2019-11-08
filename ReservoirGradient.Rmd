@@ -3,10 +3,10 @@ title: "Dormancy and dispersal structure bacterial communities across ecosystem 
 author: "Nathan I. Wisnoski, Mario E. Muscarella, Megan L. Larsen, and Jay T. Lennon"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  word_document: default
   pdf_document:
     fig_caption: yes
     keep_tex: yes
+  word_document: default
 header-includes:
 - \usepackage{array}
 - \usepackage{graphics}
@@ -413,12 +413,17 @@ turn.mean    <- round(apply(turn.lake, 1, mean), 3)
 turn.se      <- round(apply(turn.lake, 1, se), 3)
 UL.turn       <- cbind(design[-c(1:3), ], turn.mean, turn.se)
 
-left_join(UL.nest, UL.turn) %>% 
+sor.lake <- as.matrix(betapart.sor$beta.sor)[-c(1:3), 1:3] 
+sor.mean    <- round(apply(sor.lake, 1, mean), 3)
+sor.se      <- round(apply(sor.lake, 1, se), 3)
+UL.sor       <- cbind(design[-c(1:3), ], sor.mean, sor.se)
+
+left_join(UL.nest, UL.turn) %>% left_join(UL.sor) %>% 
   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
-  ggplot(aes(x = distance, y = turn.mean, shape = molecule)) +
+  ggplot(aes(x = distance, y = sor.mean, shape = molecule)) +
   geom_smooth(method = "lm", aes(linetype = molecule), color = "black", show.legend = T) + 
   geom_point(alpha = 0.8, size = 3, show.legend = T) + 
-  labs(y = str_wrap("Percent similarity to soil community", width = 20), 
+  labs(y = str_wrap("Dissimilarity to soil community", width = 20), 
        x = "Reservoir distance (m)") + 
   scale_x_continuous(limits = c(-49,350))
 
@@ -441,14 +446,17 @@ UL_betapartitions <- left_join(UL.nest, UL.turn) %>% left_join(UL.rich) %>% left
 UL_betapartitions %>% 
   mutate(molecule = ifelse(molecule == "DNA", "Total", "Active")) %>% 
   mutate(family = ifelse(partition %in% c("nest.mean", "turn.mean"), "Baselga", "Podani")) %>% 
-  ggplot(aes(x = distance, y = beta, shape = molecule, color = molecule, fill = molecule)) +
+  filter(family == "Baselga") %>% 
+  mutate(partition = ifelse(partition == "nest.mean", "Mean Nestedness", "Mean Turnover")) %>% 
+  ggplot(aes(x = distance, y = beta, shape = molecule)) +
   geom_smooth(method = "lm", aes(linetype = molecule), color = "black", show.legend = T) + 
-  geom_point(alpha = 0.8, size = 3, show.legend = T) + 
-  facet_wrap(family~partition) +
+  geom_point(alpha = 0.3, size = 3, show.legend = T) + 
+  #geom_errorbar(aes(ymax = beta + se, ymin = beta - se), width = 10) +
+  facet_wrap(.~partition) +
   labs(y = str_wrap("Beta diversity partition (Sorensen)", width = 20), 
        x = "Reservoir distance (m)") + 
   scale_x_continuous(limits = c(-49,350)) +
-  ggsave("figures/nestedness.pdf", width = 8, height = 8)
+  ggsave("figures/nestedness.pdf", width = 8, height = 4)
 
 
 ```

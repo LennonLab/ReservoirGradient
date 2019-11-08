@@ -125,7 +125,7 @@ Lennon}
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{24 August, 2019}
+    \date{04 November, 2019}
 
 \usepackage{array}
 \usepackage{graphics}
@@ -146,21 +146,17 @@ some other functions.
 \KeywordTok{library}\NormalTok{(}\StringTok{"grid"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{)   }
 \KeywordTok{library}\NormalTok{(}\StringTok{"vegan"}\NormalTok{)}
-\CommentTok{#library("xtable")}
 \KeywordTok{library}\NormalTok{(}\StringTok{"viridis"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"cowplot"}\NormalTok{)}
-\CommentTok{#library("adespatial")}
 \KeywordTok{library}\NormalTok{(}\StringTok{"ggrepel"}\NormalTok{)}
-\CommentTok{#library("gganimate")}
-\CommentTok{#library("maps")}
-\CommentTok{#library("rgdal")}
 \KeywordTok{library}\NormalTok{(}\StringTok{"iNEXT"}\NormalTok{)}
-\CommentTok{#library("officer")}
-\CommentTok{#library("flextable") #must have gdtools installed also}
 \KeywordTok{library}\NormalTok{(}\StringTok{"broom"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"ggpmisc"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"pander"}\NormalTok{)}
 \KeywordTok{library}\NormalTok{(}\StringTok{"lubridate"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"betapart"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"adespatial"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(}\StringTok{"VennDiagram"}\NormalTok{)}
 
 \KeywordTok{source}\NormalTok{(}\StringTok{"bin/mothur_tools.R"}\NormalTok{)}
 \NormalTok{se <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x, ...)\{}\KeywordTok{sd}\NormalTok{(x, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}\OperatorTok{/}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{length}\NormalTok{(}\KeywordTok{na.omit}\NormalTok{(x)))\}}
@@ -264,8 +260,56 @@ log-transforming the abundances and relativizing by site.
 \CommentTok{# Remove OTUs with < 2 occurences across all sites}
 \NormalTok{OTUs <-}\StringTok{ }\NormalTok{OTUs[, }\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs) }\OperatorTok{>=}\StringTok{ }\DecValTok{2}\NormalTok{)]}
 \NormalTok{coverage <-}\StringTok{ }\KeywordTok{rowSums}\NormalTok{(OTUs)}
+
+\CommentTok{# Rarify the community, nest RNA in DNA, and reorganize OTU table}
 \KeywordTok{set.seed}\NormalTok{(}\DecValTok{47405}\NormalTok{)}
 \NormalTok{OTUs <-}\StringTok{ }\KeywordTok{rrarefy}\NormalTok{(OTUs, }\KeywordTok{min}\NormalTok{(coverage))}
+\NormalTok{OTUs.w.dna <-}\StringTok{ }\NormalTok{OTUs[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{),]}
+\KeywordTok{rowSums}\NormalTok{((OTUs.w.dna }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## RGD01 RGD02 RGD03 RGD04 RGD06 RGD07 RGD08 RGD09 RGD10 RGD11 RGD12 RGD13 
+##   319   405   468   372   415   693   545   704   687  1050  1387   515 
+## RGD14 RGD15 
+##   548  1313
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{OTUs.w.rna <-}\StringTok{ }\NormalTok{OTUs[}\KeywordTok{which}\NormalTok{(design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{),]}
+\KeywordTok{rowSums}\NormalTok{((OTUs.w.rna }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## RGc01 RGc02 RGc03 RGc04 RGc05 RGc07 RGc08 RGc09 RGc10 RGc11 RGc12 RGc13 
+##   130   142    69   283   142    56   101   162   462   159   185   163 
+## RGc14 RGc15 
+##   108   107
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{OTUs.w.dna <-}\StringTok{ }\NormalTok{OTUs.w.dna }\OperatorTok{+}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{decostand}\NormalTok{(OTUs.w.rna, }\DataTypeTok{method =} \StringTok{"pa"}\NormalTok{))}
+\KeywordTok{rowSums}\NormalTok{((OTUs.w.dna }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## RGD01 RGD02 RGD03 RGD04 RGD06 RGD07 RGD08 RGD09 RGD10 RGD11 RGD12 RGD13 
+##   325   412   472   385   429   699   554   712   741  1065  1396   531 
+## RGD14 RGD15 
+##   566  1321
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{OTUs <-}\StringTok{ }\KeywordTok{rbind}\NormalTok{(OTUs[}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{,],}
+\NormalTok{              OTUs.w.dna,}
+\NormalTok{              OTUs.w.rna)}
+\NormalTok{OTUs <-}\StringTok{ }\NormalTok{OTUs[}\KeywordTok{match}\NormalTok{(}\KeywordTok{rownames}\NormalTok{(design), }\KeywordTok{rownames}\NormalTok{(OTUs)),]}
 
 \CommentTok{# Make Relative Abundance Matrices}
 \NormalTok{OTUsREL <-}\StringTok{ }\KeywordTok{decostand}\NormalTok{(OTUs, }\DataTypeTok{method =} \StringTok{"total"}\NormalTok{)}
@@ -717,7 +761,7 @@ to the soil community.
 
 \begin{verbatim}
 ##          1          2 
-## 0.03090104 0.16890225
+## 0.03090104 0.17193131
 \end{verbatim}
 
 \begin{Shaded}
@@ -760,46 +804,46 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \begin{minipage}[t]{0.31\columnwidth}\centering
 \textbf{(Intercept)}\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
-0.1689\strut
+0.1719\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
-0.01475\strut
+0.0138\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering
-11.45\strut
+12.46\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.279e-11\strut
+5.707e-12\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.31\columnwidth}\centering
 \textbf{distance}\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
--0.0004087\strut
+-0.0003988\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
-7.298e-05\strut
+6.827e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering
--5.6\strut
+-5.841\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-9.19e-06\strut
+5.045e-06\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.31\columnwidth}\centering
 \textbf{moleculeRNA}\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
--0.138\strut
+-0.141\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
-0.02087\strut
+0.01952\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering
--6.614\strut
+-7.226\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-7.688e-07\strut
+1.821e-07\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.31\columnwidth}\centering
 \textbf{distance:moleculeRNA}\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
-0.0003938\strut
+0.0003839\strut
 \end{minipage} & \begin{minipage}[t]{0.15\columnwidth}\centering
-0.0001027\strut
+9.608e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.11\columnwidth}\centering
-3.834\strut
+3.996\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0007998\strut
+0.0005324\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
@@ -850,7 +894,7 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/plot_similarity_to_soils-1} \end{center}
 
 We find that our model captures most of the variation in community
-structure \((R^2 = 0.7469401)\). We note a significant influence of
+structure \((R^2 = 0.7806377)\). We note a significant influence of
 distance on community similarity and the presence of a significant
 interaction between distance and whether the comparison is for active or
 total bacterial communities. This indicates that total communities decay
@@ -874,6 +918,79 @@ reservoir.
 \end{Shaded}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/combined-plots-1} \end{center}
+
+\hypertarget{are-the-aquatic-samples-nested-subsets-of-the-soil}{%
+\subsection{Are the aquatic samples nested subsets of the
+soil?}\label{are-the-aquatic-samples-nested-subsets-of-the-soil}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{betapart.sor <-}\StringTok{ }\KeywordTok{beta.pair}\NormalTok{(}\KeywordTok{decostand}\NormalTok{(OTUs, }\DataTypeTok{method =} \StringTok{"pa"}\NormalTok{), }\StringTok{"sorensen"}\NormalTok{)}
+
+\NormalTok{nest.lake <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(betapart.sor}\OperatorTok{$}\NormalTok{beta.sne)[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{] }
+\NormalTok{nest.mean    <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(nest.lake, }\DecValTok{1}\NormalTok{, mean), }\DecValTok{3}\NormalTok{)}
+\NormalTok{nest.se      <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(nest.lake, }\DecValTok{1}\NormalTok{, se), }\DecValTok{3}\NormalTok{)}
+\NormalTok{UL.nest       <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(design[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), ], nest.mean, nest.se)}
+
+\NormalTok{turn.lake <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(betapart.sor}\OperatorTok{$}\NormalTok{beta.sim)[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{] }
+\NormalTok{turn.mean    <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(turn.lake, }\DecValTok{1}\NormalTok{, mean), }\DecValTok{3}\NormalTok{)}
+\NormalTok{turn.se      <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(turn.lake, }\DecValTok{1}\NormalTok{, se), }\DecValTok{3}\NormalTok{)}
+\NormalTok{UL.turn       <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(design[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), ], turn.mean, turn.se)}
+
+\NormalTok{sor.lake <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(betapart.sor}\OperatorTok{$}\NormalTok{beta.sor)[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{] }
+\NormalTok{sor.mean    <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(sor.lake, }\DecValTok{1}\NormalTok{, mean), }\DecValTok{3}\NormalTok{)}
+\NormalTok{sor.se      <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(sor.lake, }\DecValTok{1}\NormalTok{, se), }\DecValTok{3}\NormalTok{)}
+\NormalTok{UL.sor       <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(design[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), ], sor.mean, sor.se)}
+
+\KeywordTok{left_join}\NormalTok{(UL.nest, UL.turn) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(UL.sor) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{molecule =} \KeywordTok{ifelse}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{, }\StringTok{"Total"}\NormalTok{, }\StringTok{"Active"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ sor.mean, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{linetype =}\NormalTok{ molecule), }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ T) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ T) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \KeywordTok{str_wrap}\NormalTok{(}\StringTok{"Dissimilarity to soil community"}\NormalTok{, }\DataTypeTok{width =} \DecValTok{20}\NormalTok{), }
+       \DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\OperatorTok{-}\DecValTok{49}\NormalTok{,}\DecValTok{350}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-3-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{betadivcomp.sor <-}\StringTok{ }\KeywordTok{beta.div.comp}\NormalTok{(}\DataTypeTok{mat =}\NormalTok{ OTUsREL.log, }\DataTypeTok{coef =} \StringTok{"S"}\NormalTok{, }\DataTypeTok{quant =} \OtherTok{FALSE}\NormalTok{, }\DataTypeTok{save.abc =} \OtherTok{FALSE}\NormalTok{)}
+
+\NormalTok{rich.lake <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(betadivcomp.sor}\OperatorTok{$}\NormalTok{rich)[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{] }
+\NormalTok{rich.se      <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(rich.lake, }\DecValTok{1}\NormalTok{, se), }\DecValTok{3}\NormalTok{)}
+\NormalTok{rich.mean    <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(rich.lake, }\DecValTok{1}\NormalTok{, mean), }\DecValTok{3}\NormalTok{)}
+\NormalTok{UL.rich       <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(design[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), ], rich.mean, rich.se)}
+
+\NormalTok{repl.lake <-}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(betadivcomp.sor}\OperatorTok{$}\NormalTok{repl)[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), }\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{] }
+\NormalTok{repl.mean    <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(repl.lake, }\DecValTok{1}\NormalTok{, mean), }\DecValTok{3}\NormalTok{)}
+\NormalTok{repl.se      <-}\StringTok{ }\KeywordTok{round}\NormalTok{(}\KeywordTok{apply}\NormalTok{(repl.lake, }\DecValTok{1}\NormalTok{, se), }\DecValTok{3}\NormalTok{)}
+\NormalTok{UL.repl       <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(design[}\OperatorTok{-}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{), ], repl.mean, repl.se)}
+
+\NormalTok{UL_betapartitions <-}\StringTok{ }\KeywordTok{left_join}\NormalTok{(UL.nest, UL.turn) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(UL.rich) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{left_join}\NormalTok{(UL.repl) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(nest.se, turn.se, rich.se, repl.se, }\DataTypeTok{key =} \StringTok{"partition"}\NormalTok{, }\DataTypeTok{value =} \StringTok{"se"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{gather}\NormalTok{(nest.mean, turn.mean, rich.mean, repl.mean, }\DataTypeTok{key =} \StringTok{"partition"}\NormalTok{, }\DataTypeTok{value =} \StringTok{"beta"}\NormalTok{)}
+  
+\NormalTok{UL_betapartitions }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{molecule =} \KeywordTok{ifelse}\NormalTok{(molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{, }\StringTok{"Total"}\NormalTok{, }\StringTok{"Active"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{family =} \KeywordTok{ifelse}\NormalTok{(partition }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"nest.mean"}\NormalTok{, }\StringTok{"turn.mean"}\NormalTok{), }\StringTok{"Baselga"}\NormalTok{, }\StringTok{"Podani"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(family }\OperatorTok{==}\StringTok{ "Baselga"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{partition =} \KeywordTok{ifelse}\NormalTok{(partition }\OperatorTok{==}\StringTok{ "nest.mean"}\NormalTok{, }\StringTok{"Mean Nestedness"}\NormalTok{, }\StringTok{"Mean Turnover"}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ distance, }\DataTypeTok{y =}\NormalTok{ beta, }\DataTypeTok{shape =}\NormalTok{ molecule)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{"lm"}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{linetype =}\NormalTok{ molecule), }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ T) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.3}\NormalTok{, }\DataTypeTok{size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{show.legend =}\NormalTok{ T) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\CommentTok{#geom_errorbar(aes(ymax = beta + se, ymin = beta - se), width = 10) +}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(.}\OperatorTok{~}\NormalTok{partition) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y =} \KeywordTok{str_wrap}\NormalTok{(}\StringTok{"Beta diversity partition (Sorensen)"}\NormalTok{, }\DataTypeTok{width =} \DecValTok{20}\NormalTok{), }
+       \DataTypeTok{x =} \StringTok{"Reservoir distance (m)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\OperatorTok{-}\DecValTok{49}\NormalTok{,}\DecValTok{350}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figures/nestedness.pdf"}\NormalTok{, }\DataTypeTok{width =} \DecValTok{8}\NormalTok{, }\DataTypeTok{height =} \DecValTok{4}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-3-2} \end{center}
 
 \hypertarget{how-does-community-structure-change-along-the-gradient}{%
 \subsection{How does community structure change along the
@@ -976,7 +1093,7 @@ classify OTUs as:\\
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.8825537
+## [1] 0.8210454
 \end{verbatim}
 
 \begin{Shaded}
@@ -986,7 +1103,7 @@ classify OTUs as:\\
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.08102603
+## [1] 0.1327096
 \end{verbatim}
 
 \begin{Shaded}
@@ -1007,7 +1124,7 @@ classify OTUs as:\\
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 495479
+## [1] 499388
 \end{verbatim}
 
 \begin{Shaded}
@@ -1017,7 +1134,7 @@ classify OTUs as:\\
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.04543756
+## [1] 0.04509793
 \end{verbatim}
 
 \begin{Shaded}
@@ -1028,7 +1145,7 @@ classify OTUs as:\\
 \end{Shaded}
 
 \begin{verbatim}
-## [1] 0.9545624
+## [1] 0.9549021
 \end{verbatim}
 
 \begin{Shaded}
@@ -1180,6 +1297,44 @@ Pr(\textgreater{}\textbar{}t\textbar{})\strut
 \end{Highlighting}
 \end{Shaded}
 
+\hypertarget{see-which-taxa-are-shared-between-habitats}{%
+\section{See which taxa are shared between
+habitats}\label{see-which-taxa-are-shared-between-habitats}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{OTUs.PA <-}\StringTok{ }\KeywordTok{decostand}\NormalTok{(OTUsREL, }\DataTypeTok{method =} \StringTok{"pa"}\NormalTok{)}
+\NormalTok{soil <-}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs.PA[design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "soil"}\NormalTok{,]) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{))}
+\NormalTok{water.dna <-}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs.PA[design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "DNA"}\NormalTok{,]) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{))}
+\NormalTok{water.rna <-}\StringTok{ }\KeywordTok{names}\NormalTok{(}\KeywordTok{which}\NormalTok{(}\KeywordTok{colSums}\NormalTok{(OTUs.PA[design}\OperatorTok{$}\NormalTok{type }\OperatorTok{==}\StringTok{ "water"} \OperatorTok{&}\StringTok{ }\NormalTok{design}\OperatorTok{$}\NormalTok{molecule }\OperatorTok{==}\StringTok{ "RNA"}\NormalTok{,]) }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{))}
+
+\KeywordTok{sum}\NormalTok{(water.rna }\OperatorTok{%in%}\StringTok{ }\NormalTok{water.dna)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2085
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nsoil <-}\StringTok{ }\KeywordTok{length}\NormalTok{(soil)}
+\NormalTok{nwdna <-}\StringTok{ }\KeywordTok{length}\NormalTok{(water.dna)}
+\NormalTok{nwrna <-}\StringTok{ }\KeywordTok{length}\NormalTok{(water.rna)}
+\NormalTok{otus.by.habitat <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\StringTok{"Soil"}\NormalTok{ =}\StringTok{ }\NormalTok{soil, }\StringTok{"Total Aquatic"}\NormalTok{ =}\StringTok{ }\NormalTok{water.dna, }\StringTok{"Active Aquatic"}\NormalTok{ =}\StringTok{ }\NormalTok{water.rna)}
+
+\KeywordTok{venn.diagram}\NormalTok{(otus.by.habitat, }\StringTok{"figures/venn_by_habitat.png"}\NormalTok{, }
+             \DataTypeTok{imagetype =} \StringTok{"png"}\NormalTok{, }
+             \DataTypeTok{fontfamily =} \StringTok{"sans"}\NormalTok{, }
+             \DataTypeTok{cat.fontfamily =} \StringTok{"sans"}\NormalTok{,}
+             \DataTypeTok{alpha =} \FloatTok{.25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1
+\end{verbatim}
+
 \hypertarget{what-is-the-fate-of-soil-derived-taxa-in-the-reservoir}{%
 \section{What is the fate of soil-derived taxa in the
 reservoir?}\label{what-is-the-fate-of-soil-derived-taxa-in-the-reservoir}}
@@ -1250,7 +1405,7 @@ them up into whether they were recovered in soils or not.
 \end{verbatim}
 
 \begin{verbatim}
-## Warning: Removed 46 rows containing non-finite values (stat_smooth).
+## Warning: Removed 10 rows containing non-finite values (stat_smooth).
 \end{verbatim}
 
 \begin{center}\includegraphics{ReservoirGradient_files/figure-latex/coreplot-1} \end{center}
@@ -1372,9 +1527,9 @@ Phylum\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00007\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--8.015e-06\strut
+-7.887e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.2431\strut
+0.2473\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1383,9 +1538,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00020\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--1.704e-05\strut
+-1.691e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.4607\strut
+0.4613\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1394,9 +1549,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00024\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--2.897e-06\strut
+-2.904e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.3675\strut
+0.36\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1405,9 +1560,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00057\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--3.017e-05\strut
+-2.992e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.009476\strut
+0.009397\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1416,9 +1571,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00138\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--3.401e-05\strut
+-3.378e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.016\strut
+0.01573\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1427,9 +1582,9 @@ Firmicutes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00169\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--1.048e-05\strut
+-1.041e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.3397\strut
+0.3399\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1438,9 +1593,9 @@ Bacteria\_unclassified\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu01010\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--3.563e-08\strut
+-3.383e-08\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
-0.635\strut
+0.6043\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1592,9 +1747,9 @@ Phylum\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00004\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0001345\strut
+0.0001338\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-1.671e-05\strut
+1.729e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1603,9 +1758,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00008\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.306e-05\strut
+3.29e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.02659\strut
+0.02679\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1614,9 +1769,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00015\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0001372\strut
+0.0001364\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0003621\strut
+0.0003654\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1625,9 +1780,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00016\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-5.151e-05\strut
+5.12e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.002113\strut
+0.002128\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1636,9 +1791,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00025\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-4.63e-05\strut
+4.605e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.006728\strut
+0.006738\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1647,9 +1802,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00038\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-4.561e-05\strut
+4.534e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0001738\strut
+0.0001784\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1658,9 +1813,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00040\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.744e-05\strut
+3.723e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-2.589e-05\strut
+2.428e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1669,9 +1824,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00071\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-4.8e-05\strut
+4.773e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0004517\strut
+0.000442\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1680,9 +1835,9 @@ Planctomycetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00079\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-8.122e-06\strut
+8.096e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.001732\strut
+0.001572\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1691,9 +1846,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00080\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-1.601e-05\strut
+1.597e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.1586\strut
+0.1571\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1702,9 +1857,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00118\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-6.59e-06\strut
+6.543e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.03765\strut
+0.03723\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1713,9 +1868,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00156\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-8.854e-06\strut
+8.8e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.002739\strut
+0.002755\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.29\columnwidth}\centering
@@ -1917,9 +2072,9 @@ Phylum\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00009\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--5.159e-05\strut
+-5.115e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02755\strut
+0.02741\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1928,9 +2083,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00010\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--4.34e-05\strut
+-4.281e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.5521\strut
+0.5552\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1939,9 +2094,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00011\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--1.949e-05\strut
+-1.928e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.6012\strut
+0.6028\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1950,9 +2105,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00018\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--4.676e-05\strut
+-4.637e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02114\strut
+0.02104\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1961,9 +2116,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00022\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--2.524e-05\strut
+-2.499e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.1182\strut
+0.1178\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1972,9 +2127,9 @@ Verrucomicrobia\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00028\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--3.068e-05\strut
+-3.043e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02359\strut
+0.02348\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1983,9 +2138,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00030\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--2.244e-06\strut
+-2.222e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.2763\strut
+0.2752\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -1994,9 +2149,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00039\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--8.596e-06\strut
+-8.511e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.1787\strut
+0.1793\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2005,9 +2160,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00045\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--8.037e-06\strut
+-7.99e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.5276\strut
+0.5274\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2016,9 +2171,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00059\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--6.541e-05\strut
+-6.488e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02553\strut
+0.02525\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2027,9 +2182,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00065\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--5.579e-05\strut
+-5.535e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02116\strut
+0.02097\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2038,9 +2193,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00072\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--1.895e-05\strut
+-1.884e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.09149\strut
+0.09145\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2049,9 +2204,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00077\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--5.886e-05\strut
+-5.843e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.01187\strut
+0.0117\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2060,9 +2215,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00086\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--1.265e-05\strut
+-1.26e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.03621\strut
+0.0353\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2071,9 +2226,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00094\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--2.23e-05\strut
+-2.214e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.03169\strut
+0.03137\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2082,9 +2237,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00095\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--3.578e-05\strut
+-3.555e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.03614\strut
+0.03573\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2093,9 +2248,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00170\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--2.494e-05\strut
+-2.475e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02878\strut
+0.02842\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2104,9 +2259,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00545\strut
 \end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\centering
--1.236e-06\strut
+-1.25e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.12\columnwidth}\centering
-0.02985\strut
+0.0273\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2368,9 +2523,9 @@ Phylum\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00001\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-1.436e-05\strut
+1.437e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.07999\strut
+0.07357\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2379,9 +2534,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00002\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0002115\strut
+0.0002104\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.002237\strut
+0.002241\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2390,9 +2545,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00003\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-9.899e-05\strut
+9.845e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.006441\strut
+0.006345\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2401,9 +2556,9 @@ Verrucomicrobia\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00005\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.61e-05\strut
+3.593e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.01737\strut
+0.01749\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2412,9 +2567,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00006\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-6.575e-06\strut
+6.515e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.1618\strut
+0.1629\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2423,9 +2578,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00012\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-7.541e-06\strut
+7.565e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.09905\strut
+0.09337\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2434,9 +2589,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00014\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-8.464e-05\strut
+8.415e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.0007891\strut
+0.0007944\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2445,9 +2600,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00023\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.267e-07\strut
+3.479e-07\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.8\strut
+0.7837\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2456,9 +2611,9 @@ Proteobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00029\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.32e-05\strut
+3.301e-05\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.004456\strut
+0.004547\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2467,9 +2622,9 @@ Actinobacteria\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00032\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-3.56e-06\strut
+3.59e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.8341\strut
+0.8316\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -2478,9 +2633,9 @@ Bacteroidetes\strut
 \begin{minipage}[t]{0.13\columnwidth}\centering
 Otu00033\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-9.129e-06\strut
+9.093e-06\strut
 \end{minipage} & \begin{minipage}[t]{0.14\columnwidth}\centering
-0.7085\strut
+0.7077\strut
 \end{minipage} & \begin{minipage}[t]{0.13\columnwidth}\centering
 Bacteria\strut
 \end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\centering
@@ -3067,7 +3222,7 @@ structure}\label{relation-of-ecosystem-functions-and-community-structure}}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-10-1} \end{center}
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-12-1} \end{center}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -3372,7 +3527,7 @@ structure}\label{relation-of-ecosystem-functions-and-community-structure}}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-11-1} \end{center}
+\begin{center}\includegraphics{ReservoirGradient_files/figure-latex/unnamed-chunk-13-1} \end{center}
 
 
 \end{document}
