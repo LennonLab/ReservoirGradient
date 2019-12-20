@@ -2,7 +2,7 @@ University Lake Reservoir Gradient Project
 ==========
 
 This repository contains open-source code, data, & text files for the Reservoir Gradient Project.
-This project is the product of the 2013 SSRP work done with Nelson.
+This project is the product of the 2013 SSRP work done with N. Nelson at Indiana University.
 
 ## Project Goals
 
@@ -10,17 +10,13 @@ This project is the product of the 2013 SSRP work done with Nelson.
 
 * **Aim 2)** Determine if microbial communities change along a stream to lake gradient.
 
-* **Aim 3)** Determine if microbial functions change along a stream to lake gradient.
+* **Aim 3)** Determine if microbial activity changes along a stream to lake gradient.
 
 ### Repo Contents
 
-* **analyses:**
-	* *ULReservoirGradient_MothurSummary.R*: An R script to test mothur output and return basic information including sequence coverage and species richness.
-	Used to determine if mothur pipeline returned logical output.
-
 
 * **data:**
-	* *res.grad.metab.txt*:
+	* *res.grad.metab.txt*: Metabolism data (bacterial production and respiration) along the gradient.
 	* *ResGrad_EnvDat.csv*: Environmental data - Contains data collected from the hydrolab and calculated environmental data.
 	This file includes the following:
 		1. UTM lat/long; WGS84
@@ -32,45 +28,42 @@ This project is the product of the 2013 SSRP work done with Nelson.
 		7. Total Phosphorus (TP; µg P/L)
 		8. Respiration Rate (µM O2 Hr-1)
 		9. Chlorphyll a ()
-	* *UL.bac.final.0.03.tax.summary*
-	* *UL.bac.final.0.03.taxonomy*:
-	* *UL.bac.final.0.05.tax.summarY*:
-	* *UL.bac.final.0.05.taxonomy*:
-	* *UL.bac.final.shared*: Mothur output shared file.
-	Used to generate the site-by-species matrix.
-	* *UL_euks.final.shared*: Mothur output shared file for eukaryotes.
+	* *ul_resgrad.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.opti_mcc.0.03.cons.tax.summary*: Taxonomy summary from mothur
+	* *ul_resgrad.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.opti_mcc.0.03.cons.taxonomy*: Taxonomy from mothur
+	* *ul_resgrad.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.opti_mcc.shared*: Site-by-OTU matrix from mothur
+	* *ul_resgrad.tree*: Phylogeny 
+	* *UL.design.txt*: Design corresponding to site by OTU matrix
 
 
 * **bin:**
-	* *MothurTools.R*: An R script written by Mario Muscarella (Indiana University) containing functions used in the analysis of mothur raw files.
-
+	* *mothur_tools.R*: An R script written by M. Muscarella and modified by N. Wisnoski containing functions used in the analysis of mothur raw files.
+	* *Chao_functions.R*: R functions from Chiu and Chao to estimate richness in the presence of sequencing errors
 
 * **figures:**
-  * *Figure1.png*: Microbial metabolism figure.
+  	* Includes a number of intermediate and final figures included in the manuscript. 
 
+* **intermediate-data:**
+	* Includes intermediate output used in the main analysis file.
 
 * **maps:**
-
+  	* Includes shapefiles of university lake
 
 * **mothur:**
-  * *UL.raw.seqs.sh*: Shell script to download raw illumina data from ()  for Reservoir Gradient Project (work in progress).  
-  * *UL.files*: Mothur input file that organizes raw sequence files into read 1 and read 2 by sample design.  
-  * *UL.Bacteria_A.Batch*: Mothur batch script for the initial sequence processing.
-	This script goes through chimera checking and the output is used by all subsequent batch scripts.
-  * *UL.Bacteria_B.Batch*: Mothur batch script for analysis of bacterial sequences.
-  * *UL.Cyano.Batch*: Mothur batch script for analysis of cyanobacteria only
-  * *UL.Euks.Batch*: Mothur batch script for anlysis of eukaryotes based on plastid sequences
-  * *UL.Bacteria_A.sh*: Torque script to execute UL.Bacteria_A.Batch on Mason (IU).   
-	Ends up submitting all subsequent torque scripts.
-  * *UL.Bacteria_B.sh*: Torque script to execute UL.Bacteria_B.sh on Mason (IU).
-  * *UL.Cyano.sh*: Torque script to execute UL.Cyano.Batch on Mason (IU).
-  * *UL.Euks.sh*: Torque script to execute UL.Euks.Batch on Mason (IU).
+	* batch file and list of raw sequence files for sequence processing
 
+* Miscellaneous cache and output files from knitr processing of the main `ReservoirGradient.Rmd` analysis file.
+* `inext_divestim.R`: analysis of diversity using Chiu and Chao 2016 PeerJ singleton correction. 
+* `ReservoirGradient.Rmd`: main analysis file. 
 
 ## Contributors
 
-[Dr. Jay Lennon](http://www.indiana.edu/~microbes/people.php): Principle Investigator, Associate Professor, Department of Biology, Indiana University, Bloomington. Head of the [Lennon Lab](http://www.indiana.edu/~microbes/people.php).
+[Nathan Wisnoski](https://nwisnoski.github.io/).
 
-[Megan Larsen](http://meganllarsen.wordpress.com): Ph.D. candidate in the [Lennon Lab](http://www.indiana.edu/~microbes/people.php)
+[Mario Muscarella](http://mmuscarella.github.io/).
 
-[Mario Muscarella](http://mmuscarella.github.io/): Ph.D. candidate in the [Lennon Lab](http://www.indiana.edu/~microbes/people.php)
+[Megan Larsen](http://meganllarsen.wordpress.com).
+
+[Ariane Peralta](https://www.peraltalab.com/).
+
+[Dr. Jay Lennon](http://www.indiana.edu/~microbes/people.php): Principle Investigator, Professor, Department of Biology, Indiana University, Bloomington. Head of the [Lennon Lab](http://www.indiana.edu/~microbes/people.php).
+
