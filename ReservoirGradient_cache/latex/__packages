@@ -1,12 +1,5 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 png
-grid
 tidyverse
 ggplot2
 tibble
@@ -29,3 +22,7 @@ ggpmisc
 pander
 lubridate
 data.table
+betapart
+adespatial
+futile.logger
+VennDiagram
