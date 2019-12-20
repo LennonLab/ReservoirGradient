@@ -52,7 +52,6 @@ This project is the product of the 2013 SSRP work done with N. Nelson at Indiana
 	* batch file and list of raw sequence files for sequence processing
 
 * Miscellaneous cache and output files from knitr processing of the main `ReservoirGradient.Rmd` analysis file.
-* `inext_divestim.R`: analysis of diversity using Chiu and Chao 2016 PeerJ singleton correction. 
 * `ReservoirGradient.Rmd`: main analysis file. 
 
 ## Contributors
